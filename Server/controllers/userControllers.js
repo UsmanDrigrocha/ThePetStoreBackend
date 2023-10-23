@@ -176,26 +176,6 @@ const verifyUserResetPassword = async (req, res) => {
 }
 
 
-
-// const verifyResetLink = async (req, res) => {
-//     const { token } = req.params;
-//     const secret = 'your_secret_key'; // The same secret used for signing
-//     jwt.verify(token, secret, async (err, decoded) => {
-//         if (err) {
-//             res.status(400).json({ message: "Error while verifying token" })
-//         } else {
-//             const { email } = decoded;
-//             const user = await userModel.findOne({ email });
-//             if (!user) {
-//                 res.status(400).json({ message: "User not found" })
-//             } else {
-//                 res.status(200).json({ message: "Valid token" })
-//             }
-//         }
-//     });
-// };
-
-
 module.exports = {
     userRegister,
     userLogin,
