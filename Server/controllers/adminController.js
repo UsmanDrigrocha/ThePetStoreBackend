@@ -12,27 +12,39 @@ const showRegistedUsers = async (req, res) => {
     }
 };
 
-
-
-
 const showBannerImg = async (req, res) => {
     try {
         const data = await bannerModel.find({});
-        
+
         //---- Display the data
         // data.forEach(item => {
-            //     // You can access other fields here as well
-            // });
-            
-            // Respond with the data in an HTTP response
-            res.status(200).json(data);
-        } catch (error) {
+        //     // You can access other fields here as well
+        // });
+
+        // Respond with the data in an HTTP response
+        res.status(200).json(data);
+    } catch (error) {
         console.error('Error retrieving data:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
 
-        module.exports = {
-            showRegistedUsers,
-            showBannerImg
-        };
+
+
+const createCategory = async (req, res) => {
+try {
+    res.status(200).json({message:"Catagory Created"});
+} catch (error) {
+    res.status(400).json({message:"Error in Creating Category",error:error.message})
+}
+}
+
+
+
+
+
+module.exports = {
+    showRegistedUsers,
+    showBannerImg,
+    createCategory
+};

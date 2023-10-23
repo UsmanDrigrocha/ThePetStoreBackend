@@ -11,9 +11,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/uploads', express.static('uploads')); // For Image Upload
-
 app.use('/api/user', userRoutes);
-
 app.use('/api/admin', adminRoutes);
 
 const port = process.env.PORT;

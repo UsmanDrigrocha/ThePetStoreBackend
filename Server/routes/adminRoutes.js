@@ -3,7 +3,8 @@ const route = express.Router();
 
 const {
     showBannerImg,
-    showRegistedUsers
+    showRegistedUsers,
+    createCategory
 } = require('../controllers/adminController');
 
 const { imageController } = require('../controllers/uploadImg')
@@ -14,8 +15,8 @@ route.get('/', (req, res) => {
     res.status(300).json({ message: "Wellcome Admin" });
 })
 
-route.get('/getBannerImg',showBannerImg);
-route.get('/getRegistedUsers',showRegistedUsers);
-
+route.get('/getBannerImg', showBannerImg);
+route.get('/getRegistedUsers', showRegistedUsers);
+route.post('/createCatagory', createCategory)
 
 module.exports = route;
