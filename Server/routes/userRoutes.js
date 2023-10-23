@@ -17,9 +17,9 @@ const {
 route.post('/register', userRegister);
 route.post('/login', userLogin);
 route.post('/generate-otp', generateOTP);
-route.post('/verify-otp', verifyOTP)
-route.post('/forget-password', userForgetPassword);
-route.post('/reset-password', userResetPassword);
+route.post('/verify-otp', verifyOTP) 
+route.post('/forget-password', userForgetPassword); // Change Old Password ✅
+route.post('/reset-password', userResetPassword); // Send link to Email
 
 
 module.exports = route;

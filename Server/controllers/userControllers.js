@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { generateOTP } = require('./otpController')
 require('dotenv').config();
+const mail = require('../utils/sendMail')
 
 //Register Account
 const userRegister = async (req, res) => {
@@ -123,30 +124,50 @@ const userForgetPassword = async (req, res) => {
 const userResetPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        res.status(200).json({ message: "just sending reset link to", email });
+        if (email) {
+            const existingUser = await userModel.findOne({ email: email });
+            if (existingUser) {
+                const link = `http://localhost:${process.env.port}/id/token`
+                const emailSubject = 'Password Reset Link';
+                const emailHTMLBody = `<p>Your Reset Link is: ${link}</p>`;
+                const recipientEmail = email;
+                const mailText = 'Reset Password Link Email'
+                const emailSent = await mail(recipientEmail, emailSubject, mailText, emailHTMLBody);
+
+                if (emailSent) {
+                    res.status(200).json({ message: 'Reset Link sent successfully' });
+                } else {
+                    res.status(500).json({ message: 'Reset Link Email Sending Failed !!' });
+                }
+            } else {
+                res.status(400).json({ message: "User Doesn't Exist" });
+            }
+        } else {
+            res.status(400).json({ message: "Enter Email !!!" })
+        }
     } catch (error) {
         console.log(error.message);
         res.status(400).json({ message: "Error in User Forget Password" });
     }
 }
 
-const verifyResetLink = async (req, res) => {
-    const { token } = req.params;
-    const secret = 'your_secret_key'; // The same secret used for signing
-    jwt.verify(token, secret, async (err, decoded) => {
-        if (err) {
-            res.status(400).json({ message: "Error while verifying token" })
-        } else {
-            const { email } = decoded;
-            const user = await userModel.findOne({ email });
-            if (!user) {
-                res.status(400).json({ message: "User not found" })
-            } else {
-                res.status(200).json({ message: "Valid token" })
-            }
-        }
-    });
-};
+// const verifyResetLink = async (req, res) => {
+//     const { token } = req.params;
+//     const secret = 'your_secret_key'; // The same secret used for signing
+//     jwt.verify(token, secret, async (err, decoded) => {
+//         if (err) {
+//             res.status(400).json({ message: "Error while verifying token" })
+//         } else {
+//             const { email } = decoded;
+//             const user = await userModel.findOne({ email });
+//             if (!user) {
+//                 res.status(400).json({ message: "User not found" })
+//             } else {
+//                 res.status(200).json({ message: "Valid token" })
+//             }
+//         }
+//     });
+// };
 
 
 module.exports = {
