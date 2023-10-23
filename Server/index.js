@@ -8,6 +8,9 @@ require('./config/db')
 
 app.use(express.json());
 app.use(cors());
+
+app.use('/uploads', express.static('uploads')); // For Image Upload
+
 app.use('/api/user', userRoutes);
 
 const port = process.env.PORT;
@@ -18,4 +21,4 @@ app.listen(port, () => {
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: "Server Working Properly", project: "ThePetStore Backend" });
-})
+});
