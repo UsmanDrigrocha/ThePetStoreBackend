@@ -1,5 +1,6 @@
 const bannerModel = require('../models/bannerModel');
 const registedUsersModel = require('../models/userModel');
+const productCategoryModel = require('../models/productCategoryModel');
 
 const showRegistedUsers = async (req, res) => {
     try {
@@ -29,15 +30,33 @@ const showBannerImg = async (req, res) => {
     }
 };
 
-
-
 const createCategory = async (req, res) => {
-try {
-    res.status(200).json({message:"Catagory Created"});
-} catch (error) {
-    res.status(400).json({message:"Error in Creating Category",error:error.message})
+    try {
+        const { name } = req.body;
+        if (!name) {
+            res.status(400).json({ message: "Enter Category Name" });
+        } else {
+            const newCategory = new productCategoryModel({
+                name
+            });
+            await newCategory.save();
+            res.status(200).json({ message: "Catagory Created", newCategory });
+        }
+    } catch (error) {
+        res.status(400).json({ message: "Error in Creating Category", error: error.message })
+    }
 }
-}
+
+const getProductCategories = async (req, res) => {
+    try {
+        const data = await productCategoryModel.find({});
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Error Getting Product Categories', error: error.message });
+    }
+};
+
 
 
 
@@ -46,5 +65,6 @@ try {
 module.exports = {
     showRegistedUsers,
     showBannerImg,
-    createCategory
+    createCategory,
+    getProductCategories
 };

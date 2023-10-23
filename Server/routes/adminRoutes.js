@@ -4,7 +4,8 @@ const route = express.Router();
 const {
     showBannerImg,
     showRegistedUsers,
-    createCategory
+    createCategory,
+    getProductCategories
 } = require('../controllers/adminController');
 
 const { imageController } = require('../controllers/uploadImg')
@@ -18,5 +19,6 @@ route.get('/', (req, res) => {
 route.get('/getBannerImg', showBannerImg);
 route.get('/getRegistedUsers', showRegistedUsers);
 route.post('/createCatagory', createCategory)
+route.get('/getProductCategories', getProductCategories)
 
 module.exports = route;
