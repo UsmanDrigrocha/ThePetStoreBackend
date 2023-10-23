@@ -38,10 +38,9 @@ const userRegister = async (req, res) => {
                         if (existingUser) {
                             res.status(409).json({ message: "Email Already Exists" });
                         } else {
-
-                            // Validate OTP before registering user
                             await newUser.save();
-                            res.status(201).json({ message: "User Registered Successfully" });
+                            const token = jwt.sign({ userID: newUser.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
+                            res.status(201).json({ message: "User Registered Successfully", token: token });
                         }
                     } catch (error) {
                         res.status(500).json({ message: "Error saving user", error: error.message });
