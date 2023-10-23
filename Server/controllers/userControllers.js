@@ -83,7 +83,7 @@ const userLogin = async (req, res) => {
 };
 
 //Forget Password : Change Password
-const userForgetPassword = async (req, res) => {
+const userChangePassword = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (email && password) {
@@ -121,19 +121,21 @@ const userForgetPassword = async (req, res) => {
 
 }
 
+// Create One time link & send to Mail
 const userResetPassword = async (req, res) => {
     try {
         const { email } = req.body;
         if (email) {
             const existingUser = await userModel.findOne({ email: email });
             if (existingUser) {
-                const link = `http://localhost:${process.env.port}/id/token`
+                //Generate One Time Reset Link ; Valid for 5 Minutes
+                const token = jwt.sign({ userID: existingUser.id }, process.env.JWT_SECRET_KEY, { expiresIn: '5m' });
+                const link = `http://localhost:${process.env.port}/api/user/reset-password/${existingUser.id}/${token}`;
                 const emailSubject = 'Password Reset Link';
                 const emailHTMLBody = `<p>Your Reset Link is: ${link}</p>`;
                 const recipientEmail = email;
                 const mailText = 'Reset Password Link Email'
                 const emailSent = await mail(recipientEmail, emailSubject, mailText, emailHTMLBody);
-
                 if (emailSent) {
                     res.status(200).json({ message: 'Reset Link sent successfully' });
                 } else {
@@ -150,6 +152,30 @@ const userResetPassword = async (req, res) => {
         res.status(400).json({ message: "Error in User Forget Password" });
     }
 }
+
+// Verify Reset Link
+const verifyUserResetPassword = async (req, res) => {
+    const { id, token } = req.params;
+    try {
+        const user = await userModel.findById(id);
+        if (!user) {
+            res.status(400).json({ message: "Invalid ID" });
+        } else {
+            jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+                if (err) {
+                    res.status(400).json({ message: 'Invalid or expired token' });
+                } else {
+                    res.status(200).json({ message: "Reset Link Verified" });
+                }
+            });
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: 'Error in reset password' });
+    }
+}
+
+
 
 // const verifyResetLink = async (req, res) => {
 //     const { token } = req.params;
@@ -173,6 +199,7 @@ const userResetPassword = async (req, res) => {
 module.exports = {
     userRegister,
     userLogin,
-    userForgetPassword,
-    userResetPassword
+    userChangePassword,
+    userResetPassword,
+    verifyUserResetPassword
 };
