@@ -14,7 +14,7 @@ const {
     verifyOTP
 } = require('../controllers/otpController')
 
-//Auth  Routes
+//Auth Routes
 route.post('/register', userRegister);
 route.post('/login', userLogin);
 route.post('/generate-otp', generateOTP);
