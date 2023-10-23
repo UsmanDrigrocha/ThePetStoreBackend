@@ -2,17 +2,8 @@ const express = require('express');
 const route = express.Router();
 
 const {
-    userRegister,
-    userLogin,
-    userResetPassword,
-    userChangePassword,
-    verifyUserResetPassword
-} = require('../controllers/userControllers');
-
-const {
-    generateOTP,
-    verifyOTP
-} = require('../controllers/otpController');
+    showBannerImg
+} = require('../controllers/showBannerImg');
 
 const { imageController } = require('../controllers/uploadImg')
 
@@ -25,10 +16,12 @@ const { imageController } = require('../controllers/uploadImg')
 // route.post('/reset-password', userResetPassword); // Send link to Email
 // route.get('/reset-password/:id/:token', verifyUserResetPassword)
 
-// route.post('/upload', imageController);
+route.post('/upload', imageController);
 
 route.get('/', (req, res) => {
     res.status(300).json({ message: "Wellcome Admin" });
 })
+
+route.get('/getBannerImg',showBannerImg)
 
 module.exports = route;
