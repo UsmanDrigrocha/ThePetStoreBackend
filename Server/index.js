@@ -17,5 +17,5 @@ app.listen(port, () => {
 });
 
 app.get('/', (req, res) => {
-    res.status(200).json({ message: "Server Working Properly",owner:"Usman Ahmad" });
+    res.status(200).json({ message: "Server Working Properly", project: "ThePetStore Backend" });
 })
