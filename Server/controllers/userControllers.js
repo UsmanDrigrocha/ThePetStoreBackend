@@ -162,7 +162,8 @@ const verifyUserResetPassword = async (req, res) => {
         const user = await userModel.findById(id);
         if (!user) {
             res.status(400).json({ message: "Invalid ID" });
-        } else {
+        } 
+        else {
             jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
                 if (err) {
                     res.status(400).json({ message: 'Invalid or expired token' });

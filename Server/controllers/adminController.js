@@ -58,6 +58,7 @@ const getProductCategories = async (req, res) => {
     }
 };
 
+// Generate Validation Token ; used to validate api (-- Middleware)
 const genereateValidityToken = async (req, res) => {
     const newToken = generateNewToken();
     function generateNewToken() {
