@@ -1,6 +1,7 @@
 const bannerModel = require('../models/bannerModel');
 const registedUsersModel = require('../models/userModel');
 const productCategoryModel = require('../models/productCategoryModel');
+const jwt = require('jsonwebtoken');
 
 const showRegistedUsers = async (req, res) => {
     try {
@@ -57,7 +58,16 @@ const getProductCategories = async (req, res) => {
     }
 };
 
-
+const genereateValidityToken = async (req, res) => {
+    const newToken = generateNewToken();
+    function generateNewToken() {
+        const secretKey = process.env.JWT_SECRET_KEY;
+        const token = jwt.sign({}, secretKey, { expiresIn: '5m' });
+        return token;
+    }
+    req.session.token = newToken;
+    res.json({ newToken });
+}
 
 
 
@@ -66,5 +76,6 @@ module.exports = {
     showRegistedUsers,
     showBannerImg,
     createCategory,
-    getProductCategories
+    getProductCategories,
+    genereateValidityToken
 };

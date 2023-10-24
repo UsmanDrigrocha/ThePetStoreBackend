@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { generateOTP } = require('./otpController')
 require('dotenv').config();
-const mail = require('../utils/sendMail')
+const mail = require('../utils/sendMail');
+const session = require('express-session')
 
 //Register Account
 const userRegister = async (req, res) => {
@@ -68,7 +69,9 @@ const userLogin = async (req, res) => {
                 const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
                 bcrypt.compare(password, user.password, function (err, result) {
                     //Comparing Password
+
                     if (result) { //if password is correct
+                        // req.session.token=token;
                         res.status(202).json({ message: "User Logged In successfully", token: token });
                     } else { // if wrong password
                         res.status(401).json({ message: "Wrong Password" });
