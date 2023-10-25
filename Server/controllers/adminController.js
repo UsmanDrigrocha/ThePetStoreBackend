@@ -5,7 +5,6 @@ const bannerModel = require('../models/bannerModel');
 require('dotenv').config();
 const path = require('path')
 const { registedUsersModel } = require('../models/userModel');
-const { bannerModel } = require('../models/bannerModel')
 const {
   Category,
   SubCategory,
