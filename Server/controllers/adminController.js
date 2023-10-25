@@ -102,7 +102,7 @@ const getProductCategories = async (req, res) => {
 };
 
 
-//################### Image Controller Logic ; 
+//################### Image Controller Logic -- Create; 
 const port = process.env.PORT;
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
 const imageFilter = (req, file, cb) => {
