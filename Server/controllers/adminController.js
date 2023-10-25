@@ -101,36 +101,34 @@ const getProductCategories = async (req, res) => {
   }
 };
 
-const imageController = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "Enter Image !!!!" })
+//Image Controller Logic ; 
+const port = process.env.PORT;
+const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
+const imageFilter = (req, file, cb) => {
+  if (allowedImageTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!'), false);
   }
-  const port = process.env.PORT;
-  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
-
-  const imageFilter = (req, file, cb) => {
-    if (allowedImageTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!'), false);
-    }
-  };
-
-  const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './public/uploads');
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const fileExtension = path.extname(file.originalname);
-      cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
-    }
-  });
-
-  const upload = multer({ storage, fileFilter: imageFilter });
-
+};
+const store = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/uploads');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const fileExtension = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
+  }
+});
+const uplod = multer({ storage: store, fileFilter: imageFilter });
+// Controller Function
+const imageController = async (req, res) => {
   try {
-    upload.single('image')(req, res, (err) => {
+    uplod.single('image')(req, res, (err) => {
+       if (!req?.file) {
+        return res.status(200).json({ message: "Can't send Empty" });
+      }
       if (err) {
         return res.status(400).json({ message: err.message });
       }
@@ -146,6 +144,7 @@ const imageController = async (req, res) => {
     res.status(400).json({ message: "Error Testing Img Upload" });
   }
 };
+
 
 
 module.exports = {
