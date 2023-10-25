@@ -141,7 +141,7 @@ const imageController = async (req, res, next) => {
       const fileType = req.file.mimetype;
       const fileName = req.file.filename;
       // Construct the complete URL
-      const fileURL = `http://localhost:${port}/public/uploads/${fileName}`;
+      const fileURL = `${fileName}`;
       const newBanner = new bannerModel({
         name,
         description,
