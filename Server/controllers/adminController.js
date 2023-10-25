@@ -4,7 +4,8 @@ const upload = multer({ storage: storage });
 const bannerModel = require('../models/bannerModel');
 require('dotenv').config();
 const path = require('path')
-const registedUsersModel = require('../models/userModel');
+const { registedUsersModel } = require('../models/userModel');
+const { bannerModel } = require('../models/bannerModel')
 const {
   Category,
   SubCategory,
@@ -127,7 +128,7 @@ const uplod = multer({ storage: store, fileFilter: imageFilter });
 const imageController = async (req, res) => {
   try {
     uplod.single('image')(req, res, (err) => {
-       if (!req?.file) {
+      if (!req?.file) {
         return res.status(200).json({ message: "Can't send Empty" });
       }
       if (err) {
