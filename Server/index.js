@@ -16,11 +16,13 @@ app.use(
     secret: process.env.JWT_SECRET_KEY,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 3600000 }, // 1 hour in milliseconds
+    cookie: { maxAge: 3600000 }, // 1 hour
   })
 );
 
-app.use('/uploads', express.static('uploads')); // For Image Upload
+
+app.use('public/uploads', express.static('uploads')); // For Image Upload
+
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 

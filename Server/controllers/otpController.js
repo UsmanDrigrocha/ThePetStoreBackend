@@ -1,6 +1,5 @@
 const OTP = require('../models/otpModel');
 const userModel = require('../models/userModel');
-
 const moment = require('moment-timezone');
 
 const mail = require('../utils/sendMail');
@@ -79,7 +78,6 @@ const verifyOTP = async (req, res) => {
         res.status(400).json({ message: "Error in verifying OTP", error: error.message });
     }
 };
-
 
 
 

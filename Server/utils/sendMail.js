@@ -30,19 +30,4 @@ async function mail(sendMailto, mailSubject, mailText, mailHTMLBody) {
 };
 
 module.exports = mail;
-/*
--- In other Function ; 
-   const emailSubject = 'Password Reset OTP';
-                const emailHTMLBody = `<p>Your OTP is: ${otpCode}</p>`;
 
-                const recipientEmail = email;
-                const mailText = 'OTP Reset Email'
-
-                const emailSent = await mail(recipientEmail, emailSubject, mailText, emailHTMLBody);
-
-                if (emailSent) {
-                    res.status(200).json({ message: 'OTP Email sent successfully' });
-                } else {
-                    res.status(500).json({ message: 'Email sending failed' });
-                }
-*/

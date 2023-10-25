@@ -1,27 +1,36 @@
+const path = require('path')
 const express = require('express');
 const route = express.Router();
-const {validateToken}=require('../middlewares/validateToken')
+const { validateToken } = require('../middlewares/validateToken');
+const { bannerModel } = require('../models/bannerModel')
 
 const {
     showBannerImg,
     showRegistedUsers,
     createCategory,
     getProductCategories,
-    genereateValidityToken
+    imageController,
+    createSubCategory,
 } = require('../controllers/adminController');
 
-const { imageController } = require('../controllers/uploadImg')
 
-route.post('/upload', imageController);
-
-route.get('/', (req, res) => {
-    res.status(300).json({ message: "Wellcome Admin" });
-})
-
-route.get('/getBannerImg', validateToken,showBannerImg);
+route.post('/upload', imageController);// Upload Banner Images  -- only Admin
+route.get('/getBannerImg', showBannerImg);
 route.get('/getRegistedUsers', showRegistedUsers);
-route.post('/createCatagory', createCategory)
-route.get('/getProductCategories', getProductCategories)
+route.post('/createCatagory', createCategory)// Create Product Category -- only Admin
+route.get('/getProductCategories', getProductCategories)// validation
+route.post('/createProductSubCategory', createSubCategory)// validation
 
-route.get('/generate-token',genereateValidityToken)
+// -------------------------------------
+
+const multer = require('multer')
+const upload = multer({dest:"./public/uploads"})
+route.post('/uploadImage', upload.single("Image"),(req, res) => {
+    try {
+        res.send("Working....")
+    } catch (error) {
+        res.status(400).json({ message: "Error Testing Img Upload" });
+    }
+});
+
 module.exports = route;

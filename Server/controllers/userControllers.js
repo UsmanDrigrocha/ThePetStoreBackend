@@ -5,7 +5,8 @@ const crypto = require('crypto');
 const { generateOTP } = require('./otpController')
 require('dotenv').config();
 const mail = require('../utils/sendMail');
-const session = require('express-session')
+const session = require('express-session');
+const bannerModel=require('../models/bannerModel')
 
 //Register Account
 const userRegister = async (req, res) => {
@@ -41,7 +42,7 @@ const userRegister = async (req, res) => {
                         } else {
                             await newUser.save();
                             const token = jwt.sign({ userID: newUser.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
-                            res.status(201).json({ message: "User Registered Successfully", token: token });
+                            res.status(201).json({ message: "User Registered Successfully", token: token, user: newUser });
                         }
                     } catch (error) {
                         res.status(500).json({ message: "Error saving user", error: error.message });
@@ -71,7 +72,7 @@ const userLogin = async (req, res) => {
                     //Comparing Password
 
                     if (result) { //if password is correct
-                        // req.session.token=token;
+                        req.session.token = token;
                         res.status(202).json({ message: "User Logged In successfully", token: token });
                     } else { // if wrong password
                         res.status(401).json({ message: "Wrong Password" });
@@ -162,7 +163,7 @@ const verifyUserResetPassword = async (req, res) => {
         const user = await userModel.findById(id);
         if (!user) {
             res.status(400).json({ message: "Invalid ID" });
-        } 
+        }
         else {
             jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
                 if (err) {
@@ -179,10 +180,29 @@ const verifyUserResetPassword = async (req, res) => {
 }
 
 
+//Show banner images
+const showBannerImg = async (req, res) => {
+    try {
+        const data = await bannerModel.find({});
+
+        //---- Display the data
+        // data.forEach(item => {
+        //     // You can access other fields here as well
+        // });
+
+        // Respond with the data in an HTTP response
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('Error retrieving data:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
 module.exports = {
     userRegister,
     userLogin,
     userChangePassword,
     userResetPassword,
-    verifyUserResetPassword
+    verifyUserResetPassword,
+    showBannerImg
 };
