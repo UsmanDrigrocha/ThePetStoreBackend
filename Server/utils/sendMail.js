@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+require('dotenv').config();
 
 async function mail(sendMailto, mailSubject, mailText, mailHTMLBody) {
     try {
@@ -6,8 +7,8 @@ async function mail(sendMailto, mailSubject, mailText, mailHTMLBody) {
             host: 'smtp.ethereal.email',
             port: 587,
             auth: {
-                user: 'desmond83@ethereal.email',
-                pass: 'CMwy8qj3RvAbQs8fW7'
+                user: 'catharine.spinka@ethereal.email',
+                pass: '1f2XhBvjAmBzpTdqZU'
             }
         });
 

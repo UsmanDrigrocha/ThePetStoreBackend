@@ -20,6 +20,7 @@ app.use(
     cookie: { maxAge: 3600000 }, // 1 hour
   })
 );
+
 // From this we can access ; image with url
 // api path  for getting image
 app.use('/', express.static(path.join(__dirname, 'public/uploads')));
