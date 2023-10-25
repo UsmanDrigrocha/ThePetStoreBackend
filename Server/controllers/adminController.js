@@ -102,6 +102,9 @@ const getProductCategories = async (req, res) => {
 };
 
 const imageController = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "Enter Image !!!!" })
+  }
   const port = process.env.PORT;
   const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
 

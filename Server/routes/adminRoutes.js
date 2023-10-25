@@ -21,35 +21,4 @@ route.post('/createCatagory', createCategory)// Create Product Category -- only 
 route.get('/getProductCategories', getProductCategories)// validation
 route.post('/createProductSubCategory', createSubCategory)// validation
 
-// -------------------------------------
-// ----new 
-// const multer = require('multer');
-// const port = process.env.PORT
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, './public/uploads');
-//     },
-//     filename: function (req, file, cb) {
-//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-//         const fileExtension = path.extname(file.originalname);
-//         cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
-//     }
-// });
-
-// const upload = multer({ storage });
-
-// route.post('/uploadImage', upload.single("image"), (req, res) => {
-//     try {
-//         const fileType = req.file.mimetype;
-//         const fileName = req.file.filename;
-
-//         // Construct the complete URL
-//         const fileURL = `http://localhost:${port}/public/uploads/${fileName}`;
-//         res.json({ message: "Working", fileURL });
-//     } catch (error) {
-//         res.status(400).json({ message: "Error Testing Img Upload" });
-//     }
-// });
-// -----------
-
 module.exports = route;
