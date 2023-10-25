@@ -1,7 +1,7 @@
 const multer = require('multer');
 const storage = multer.memoryStorage(); // Store image data in memory
 const upload = multer({ storage: storage });
-const bannerModel = require('../models/bannerModel');
+const bannerModel = require('../models/bannerModel'); //banner model
 require('dotenv').config();
 const path = require('path')
 const { registedUsersModel } = require('../models/userModel');
@@ -102,7 +102,7 @@ const getProductCategories = async (req, res) => {
 };
 
 
-//Image Controller Logic ; 
+//################### Image Controller Logic ; 
 const port = process.env.PORT;
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
 const imageFilter = (req, file, cb) => {
@@ -124,7 +124,7 @@ const store = multer.diskStorage({
 });
 const uplod = multer({ storage: store, fileFilter: imageFilter });
 // Controller Function
-const imageController = async (req, res) => {
+const imageController = async (req, res, next) => {
   try {
     uplod.single('image')(req, res, (err) => {
       if (!req?.file) {
@@ -134,11 +134,21 @@ const imageController = async (req, res) => {
         return res.status(400).json({ message: err.message });
       }
 
+      const { name, description } = req.body;
       const fileType = req.file.mimetype;
       const fileName = req.file.filename;
-
       // Construct the complete URL
       const fileURL = `http://localhost:${port}/public/uploads/${fileName}`;
+      const newBanner = new bannerModel({
+        name,
+        description,
+        image: fileURL
+      })
+      const saveToDb = async () => {
+        await newBanner.save()
+      }
+      saveToDb() // calling it 
+      console.log(newBanner)
       res.json({ message: "Working", fileURL });
     });
   } catch (error) {
