@@ -127,14 +127,17 @@ const uplod = multer({ storage: store, fileFilter: imageFilter });
 const imageController = async (req, res, next) => {
   try {
     uplod.single('image')(req, res, (err) => {
-      if (!req?.file) {
-        return res.status(200).json({ message: "Can't send Empty" });
+      if (!req.file) {
+        return res.status(200).json({ message: "Enter Image" });
       }
       if (err) {
         return res.status(400).json({ message: err.message });
       }
 
       const { name, description } = req.body;
+      if (!name || !description) {
+        return res.status(200).json({ message: "Enter all fields" })
+      }
       const fileType = req.file.mimetype;
       const fileName = req.file.filename;
       // Construct the complete URL
