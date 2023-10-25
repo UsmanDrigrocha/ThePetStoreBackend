@@ -5,6 +5,7 @@ const cors = require('cors')
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes')
 require('dotenv').config();
+const path = require('path');
 
 require('./config/db')
 
@@ -19,9 +20,9 @@ app.use(
     cookie: { maxAge: 3600000 }, // 1 hour
   })
 );
+// From this we can access ; image with url
+app.use('/public/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-
-app.use('public/uploads', express.static('uploads')); // For Image Upload
 
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);

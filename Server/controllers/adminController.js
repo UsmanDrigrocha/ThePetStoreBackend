@@ -2,6 +2,8 @@ const multer = require('multer');
 const storage = multer.memoryStorage(); // Store image data in memory
 const upload = multer({ storage: storage });
 const bannerModel = require('../models/bannerModel');
+require('dotenv').config();
+const path = require('path')
 const registedUsersModel = require('../models/userModel');
 const {
   Category,
@@ -9,6 +11,7 @@ const {
   childSubCategory,
   Product,
 } = require('../models/productModel');
+
 
 const jwt = require('jsonwebtoken');
 
@@ -87,7 +90,7 @@ const createSubCategory = async (req, res) => {
 };
 
 
-// 
+
 const getProductCategories = async (req, res) => {
   try {
     const data = await Category.find({});
@@ -98,46 +101,46 @@ const getProductCategories = async (req, res) => {
   }
 };
 
-// ---------------------------------
 const imageController = async (req, res) => {
+  const port = process.env.PORT;
+  const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
+
+  const imageFilter = (req, file, cb) => {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!'), false);
+    }
+  };
+
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './public/uploads');
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const fileExtension = path.extname(file.originalname);
+      cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
+    }
+  });
+
+  const upload = multer({ storage, fileFilter: imageFilter });
+
   try {
-    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', /* Add more types as needed */];
-
-    const imageFilter = (req, file, cb) => {
-      if (allowedImageTypes.includes(file.mimetype)) {
-        // Accept only specific image MIME types in the 'allowedImageTypes' array
-        cb(null, true);
-      } else {
-        cb(new Error('Only specific image file types (JPEG, PNG, GIF, etc.) are allowed!'), false);
-      }
-    };
-
-    const upload = multer({ storage: storage, fileFilter: imageFilter });
-
-    upload.single('image')(req, res, async (err) => {
+    upload.single('image')(req, res, (err) => {
       if (err) {
         return res.status(400).json({ message: err.message });
       }
 
-      // Process the uploaded image data
-      const imageBuffer = req.file.buffer;
-      const contentType = req.file.mimetype;
-      const { name, description } = req.body;
+      const fileType = req.file.mimetype;
+      const fileName = req.file.filename;
 
-      // Save the image to the database
-      const image = new bannerModel({
-        data: imageBuffer,
-        contentType: contentType,
-        name: name,
-        description: description,
-      });
-
-      await image.save();
-
-      res.status(200).json({ message: "Image saved to DataBase" });
+      // Construct the complete URL
+      const fileURL = `http://localhost:${port}/public/uploads/${fileName}`;
+      res.json({ message: "Working", fileURL });
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ message: "Error Testing Img Upload" });
   }
 };
 
