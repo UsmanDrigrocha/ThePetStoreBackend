@@ -101,6 +101,7 @@ const getProductCategories = async (req, res) => {
   }
 };
 
+
 //Image Controller Logic ; 
 const port = process.env.PORT;
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
