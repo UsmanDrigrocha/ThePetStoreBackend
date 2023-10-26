@@ -4,7 +4,7 @@ const upload = multer({ storage: storage });
 const bannerModel = require('../models/bannerModel'); //banner model
 require('dotenv').config();
 const path = require('path')
-const { registedUsersModel } = require('../models/userModel');
+const userModel = require('../models/userModel');
 const {
   Category,
   SubCategory,
@@ -17,9 +17,14 @@ const jwt = require('jsonwebtoken');
 
 const showRegistedUsers = async (req, res) => {
   try {
-    const data = await registedUsersModel.find({});
-
-    res.status(200).json(data);
+    try {
+      const data = await userModel.find({})
+      console.log(data)
+      res.status(200).json(data);
+    } catch (error) {
+      console.log(error)
+      res.status(400).json({ message: "Error Getting Data from DB", error: error.message })
+    }
   } catch (error) {
     console.error('Error retrieving Users:', error);
     res.status(500).json({ message: 'Internal Server Error' });

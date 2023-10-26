@@ -5,7 +5,10 @@ const crypto = require('crypto');
 require('dotenv').config();
 const mail = require('../utils/sendMail');
 const session = require('express-session');
-const bannerModel = require('../models/bannerModel')
+const bannerModel = require('../models/bannerModel');
+const multer = require('multer');
+const path = require('path')
+
 
 //Register Account
 const userRegister = async (req, res) => {
@@ -33,7 +36,8 @@ const userRegister = async (req, res) => {
                         password: hashedPassword,
                         otp: null,
                         createdAt: null,
-                        expiresAt: null
+                        expiresAt: null,
+                        profileImage: null
                     });
 
                     try {
@@ -274,6 +278,74 @@ const verifyOTP = async (req, res) => {
     }
 };
 
+
+// // ---------------------
+
+const port = process.env.PORT;
+const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
+const imageFilter = (req, file, cb) => {
+    if (allowedImageTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!'), false);
+    }
+};
+const store = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './public/uploads');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = path.extname(file.originalname);
+        cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
+    }
+});
+const uplod = multer({ storage: store, fileFilter: imageFilter });
+// Controller Function
+const addUserProfile = async (req, res) => {
+    try {
+        uplod.single('image')(req, res, (err) => {
+            if (!req?.file) {
+                return res.status(200).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
+            }
+
+            const { email } = req.body;
+            if (!email) {
+                return res.status(200).json({ message: "Enter all fields" })
+            }
+            const fileType = req.file.mimetype;
+            const fileName = req.file.filename;
+            const fileURL = `${fileName}`;
+
+
+
+            try {
+                const saveToDb = async () => {
+                    const findUser = await userModel.findOne({ email: email });
+                    if (!findUser) {
+                        return res.status(400).json({ message: "User Not registered" })
+                    } else {
+                        const userProfileImage = await userModel.findOneAndUpdate({ email: email }, {
+                            profileImage: fileURL
+                        });
+                        res.json({ message: "Profile Pic Updated", fileURL });
+                    }
+                }
+                saveToDb() // calling it 
+
+            } catch (error) {
+                console.log(error)
+                res.status(400).json({ message: "User Not found" })
+            }
+        });
+    } catch (error) {
+        res.status(400).json({ message: "Error Uploading User Profile" })
+    }
+
+
+}
+
+
 module.exports = {
     userRegister,
     userLogin,
@@ -282,5 +354,6 @@ module.exports = {
     verifyUserResetPassword,
     showBannerImg,
     generateOTP,
-    verifyOTP
+    verifyOTP,
+    addUserProfile
 };
