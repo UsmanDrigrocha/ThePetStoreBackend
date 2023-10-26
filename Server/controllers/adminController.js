@@ -127,7 +127,7 @@ const uplod = multer({ storage: store, fileFilter: imageFilter });
 const imageController = async (req, res, next) => {
   try {
     uplod.single('image')(req, res, (err) => {
-      if (!req.file) {
+      if (!req?.file) {
         return res.status(200).json({ message: "Enter Image" });
       }
       if (err) {
