@@ -256,7 +256,6 @@ const verifyOTP = async (req, res) => {
 
         if (otpUser) {
             if (otpUser.otp === enteredOTP) {
-                console.log(otpUser)
                 const currentTime = new Date();
                 if (otpUser.expiresAt >= currentTime) {
                     res.status(200).json({ message: "OTP Verified Successfully" });
