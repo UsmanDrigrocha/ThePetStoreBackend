@@ -182,7 +182,7 @@ const verifyUserResetPassword = async (req, res) => {
 }
 
 
-//Show banner images
+//Show banner images 
 const showBannerImg = async (req, res) => {
     try {
         const data = await bannerModel.find({});
@@ -200,6 +200,7 @@ const showBannerImg = async (req, res) => {
     }
 };
 
+//Generate OTP ; valid for 1.5 Minutes
 const generateOTP = async (req, res) => {
     try {
         const { email } = req.body;
