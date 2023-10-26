@@ -7,8 +7,8 @@ async function mail(sendMailto, mailSubject, mailText, mailHTMLBody) {
             host: 'smtp.ethereal.email',
             port: 587,
             auth: {
-                user: 'ellis.bechtelar21@ethereal.email',
-                pass: 'bsxwj6gErscU88mx4x'
+                user: 'nannie72@ethereal.email',
+                pass: 'q2p2dbAHQvc6VUwYCz'
             }
         });
 
