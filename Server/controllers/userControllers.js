@@ -345,13 +345,15 @@ const addUserProfile = async (req, res) => {
 
 
 // Update User Profile;
-const updateUserProfile = async (req, res) => {
+const updateUserProfile = async (req, res, next) => {
     try {
-        res.status(300).json({ message: "User Profile Updated" })
     } catch (error) {
+        console.log(error.message)
         res.status(400).json({ message: "Error Updating user Profile" })
     }
 }
+
+
 
 module.exports = {
     userRegister,

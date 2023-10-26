@@ -139,17 +139,12 @@ const imageController = async (req, res, next) => {
         return res.status(400).json({ message: err.message });
       }
 
-      const { name, description } = req.body;
-      if (!name || !description) {
-        return res.status(200).json({ message: "Enter all fields" })
-      }
+
       const fileType = req.file.mimetype;
       const fileName = req.file.filename;
       // Construct the complete URL
       const fileURL = `${fileName}`;
       const newBanner = new bannerModel({
-        name,
-        description,
         image: fileURL
       })
       const saveToDb = async () => {
