@@ -345,7 +345,13 @@ const addUserProfile = async (req, res) => {
 
 
 // Update User Profile;
-
+const updateUserProfile = async (req, res) => {
+    try {
+        res.status(300).json({ message: "User Profile Updated" })
+    } catch (error) {
+        res.status(400).json({ message: "Error Updating user Profile" })
+    }
+}
 
 module.exports = {
     userRegister,
@@ -356,5 +362,6 @@ module.exports = {
     showBannerImg,
     generateOTP,
     verifyOTP,
-    addUserProfile
+    addUserProfile,
+    updateUserProfile
 };

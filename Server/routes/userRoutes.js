@@ -13,7 +13,8 @@ const {
     showBannerImg,
     generateOTP,
     verifyOTP,
-    addUserProfile
+    addUserProfile,
+    updateUserProfile
 } = require('../controllers/userControllers');
 
 const {getProductCategories}=require('../controllers/adminController')
@@ -28,6 +29,7 @@ route.post('/change-password', userChangePassword); // Change Old Password ✅
 route.post('/reset-password', userResetPassword); // Send link to Email
 route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
 route.post('/updateProfileImage',addUserProfile)
+route.post('/updateUserProfile',updateUserProfile)
 
 //protected routes
 route.get('/getAllCategories',validateToken,getProductCategories)
