@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String },
   email: {
     type: String,
-    required: true,
     unique: true,
     // validate: {
     //   validator: async function (value) {
@@ -15,7 +14,10 @@ const userSchema = new mongoose.Schema({
     // },
     // description: 'The email address of the user.',
   },
-  password: { type: String, required: true },
+  password: { type: String },
+  otp: String,
+  createdAt: { type: Date, default: Date.now },
+  expiresAt: Date,
 });
 
 

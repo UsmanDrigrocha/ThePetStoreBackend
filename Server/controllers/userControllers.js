@@ -2,11 +2,10 @@ const userModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { generateOTP } = require('./otpController')
 require('dotenv').config();
 const mail = require('../utils/sendMail');
 const session = require('express-session');
-const bannerModel=require('../models/bannerModel')
+const bannerModel = require('../models/bannerModel')
 
 //Register Account
 const userRegister = async (req, res) => {
@@ -32,6 +31,9 @@ const userRegister = async (req, res) => {
                         name: name,
                         email: email,
                         password: hashedPassword,
+                        otp: null,
+                        createdAt: null,
+                        expiresAt: null
                     });
 
                     try {
@@ -198,11 +200,87 @@ const showBannerImg = async (req, res) => {
     }
 };
 
+const generateOTP = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            res.status(400).json({ message: "Enter Email !!!" });
+        } else {
+            const user = await userModel.findOne({ email: email })
+            if (user) {
+                const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+
+                const createdAtDateTime = new Date();
+                const expiredAtDateTime = new Date(createdAtDateTime.getTime() + 90000); // 1.5 Minute
+
+                const newUser = await userModel.findOneAndUpdate({ email: email }, {
+                    createdAt: createdAtDateTime,
+                    expiresAt: expiredAtDateTime,
+                    otp: otpCode
+                });
+
+                const emailSubject = 'Password Reset OTP';
+                const emailHTMLBody = `<p>Your OTP is: ${otpCode}</p>`;
+
+                const recipientEmail = email;
+                const mailText = 'OTP Reset Email';
+
+                const emailSent = await mail(recipientEmail, emailSubject, mailText, emailHTMLBody);
+
+                if (emailSent) {
+                    res.status(200).json({ message: 'OTP Email sent successfully', Email: recipientEmail });
+                } else {
+                    res.status(500).json({ message: 'Email sending failed' });
+                }
+            } else {
+                res.status(400).json({ message: "User Not Registered" });
+            }
+        }
+    } catch (error) {
+        console.log(error.message)
+        res.status(400).json({ message: "Error in generating otp", error: error.message });
+    }
+};
+
+// Verify OTP
+const verifyOTP = async (req, res) => {
+    try {
+        const { email, enteredOTP } = req.body;
+
+        if (!email || !enteredOTP) {
+            return res.status(400).json({ message: "User ID and OTP are required." });
+        }
+
+        const otpUser = await userModel.findOne({ email: email });
+
+        if (otpUser) {
+            if (otpUser.otp === enteredOTP) {
+                console.log(otpUser)
+                const currentTime = new Date();
+                if (otpUser.expiresAt >= currentTime) {
+                    res.status(200).json({ message: "OTP Verified Successfully" });
+                } else {
+                    res.status(400).json({ message: "Invalid OTP" }); // expired
+                }
+            } else {
+                res.status(400).json({ message: "Invalid OTP" }); // wrong otp
+            }
+        }
+        else {
+            res.status(400).json({ message: "User Not Found." });
+        }
+    } catch (error) {
+        res.status(400).json({ message: "Error in verifying OTP", error: error.message });
+    }
+};
+
 module.exports = {
     userRegister,
     userLogin,
     userChangePassword,
     userResetPassword,
     verifyUserResetPassword,
-    showBannerImg
+    showBannerImg,
+    generateOTP,
+    verifyOTP
 };
