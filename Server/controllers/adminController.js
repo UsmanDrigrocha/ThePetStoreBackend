@@ -151,7 +151,7 @@ const imageController = async (req, res, next) => {
         await newBanner.save()
       }
       saveToDb() // calling it 
-      res.json({ message: "Working", fileURL });
+      res.json({ message: "File Uploaded Successfully", fileURL });
     });
   } catch (error) {
     res.status(400).json({ message: "Error Testing Img Upload" });
