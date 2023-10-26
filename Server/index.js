@@ -22,9 +22,8 @@ app.use(
 );
 
 // From this we can access ; image with url
-// api path  for getting image
+// api path / for getting image
 app.use('/', express.static(path.join(__dirname, 'public/uploads')));
-
 
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);

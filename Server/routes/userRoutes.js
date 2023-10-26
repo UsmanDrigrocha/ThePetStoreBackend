@@ -28,8 +28,7 @@ route.post('/verify-otp', verifyOTP)
 route.post('/change-password', userChangePassword); // Change Old Password ✅
 route.post('/reset-password', userResetPassword); // Send link to Email
 route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
-route.post('/updateProfileImage',addUserProfile) // use :/id
-route.post('/updateUserProfile',updateUserProfile) // use :/id
+route.post('/updateProfile',addUserProfile) // use :/id
 
 //protected routes
 route.get('/getAllCategories',validateToken,getProductCategories)
