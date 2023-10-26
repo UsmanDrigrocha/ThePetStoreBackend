@@ -60,6 +60,9 @@ const createCategory = async (req, res) => {
       }
 
       const { name } = req.body;
+      if (!name) {
+        return res.status(400).json({ message: "Enter Name of Category !!!" })
+      }
       const fileType = req.file.mimetype;
       const fileName = req.file.filename;
       // Construct the complete URL
@@ -82,34 +85,40 @@ const createCategory = async (req, res) => {
 
 
 const createSubCategory = async (req, res) => {
-  // try {
-  //   uplod.single('image')(req, res, (err) => {
-  //     if (!req?.file) {
-  //       return res.status(200).json({ message: "Enter Image" });
-  //     }
-  //     if (err) {
-  //       return res.status(400).json({ message: err.message });
-  //     }
+  try {
+    uplod.single('image')(req, res, (err) => {
+      if (!req?.file) {
+        return res.status(200).json({ message: "Enter Image" });
+      }
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
 
-  //     const { name, parentId } = req.body;
-  //     const fileType = req.file.mimetype;
-  //     const fileName = req.file.filename;
-  //     // Construct the complete URL
-  //     const fileURL = `${fileName}`;
-  //     const newCategory = new Category({
-  //       image: fileURL,
-  //       name: name,
-        
-  //     })
-  //     const saveToDb = async () => {
-  //       await newCategory.save()
-  //     }
-  //     saveToDb() // calling it 
-  //     res.json({ message: "Category Created Successfully", newCategory });
-  //   });
-  // } catch (error) {
-  //   res.status(400).json({ message: "Error Testing Img Upload" });
-  // }
+      const { name, parentId } = req.body;
+      if (!name) {
+        return res.status({ message: "Enter Name of sub Category" })
+      } else if (!parentId) {
+        return res.status({ message: "Enter id of  Its Parent" })
+      }
+      const fileType = req.file.mimetype;
+      const fileName = req.file.filename;
+      // Construct the complete URL
+      const fileURL = `${fileName}`;
+      const newSubCategory = new SubCategory({
+        image: fileURL,
+        name: name,
+        parent: parentId
+      })
+
+      const saveToDb = async () => {
+        await newSubCategory.save()
+      }
+      saveToDb() // calling it 
+      res.json({ message: "Category Created Successfully", newSubCategory });
+    });
+  } catch (error) {
+    res.status(400).json({ message: "Error Testing Img Upload" });
+  }
 };
 
 

@@ -21,7 +21,10 @@ const subCategorySchema = new Schema({
     name: String,
     date: { type: Date, default: Date.now },
     image: String,
-    Category: { type: Schema.Types.ObjectId, ref: 'Category' },
+    parent: {
+        type: Schema.Types.ObjectId,
+        ref: 'Category'
+    },
 });
 
 
@@ -30,7 +33,10 @@ const childSubCategorySchema = new Schema({
     name: String,
     date: Date,
     image: String,
-    parentSubCategory: { type: Schema.Types.ObjectId, ref: 'SubCategory' },
+    parent: {
+        type: Schema.Types.ObjectId,
+        ref: 'SubCategory'
+    },
 });
 
 
@@ -42,7 +48,13 @@ const productSchema = new Schema({
     price: Number,
     size: String,
     quantity: Number,
-    parentChildSubCategory: { type: Schema.Types.ObjectId, ref: 'ChildSubCategory' },
+    parent: {
+        type: Schema.Types.ObjectId,
+        ref: 'ChildSubCategory' 
+    },
+    // animal -- optional 
+    // brand -- optional
+    // coupon -- optional
 });
 
 
