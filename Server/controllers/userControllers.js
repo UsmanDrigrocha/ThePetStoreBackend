@@ -341,9 +341,10 @@ const addUserProfile = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: "Error Uploading User Profile" })
     }
-
-
 }
+
+
+// Update User Profile;
 
 
 module.exports = {
