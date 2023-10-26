@@ -151,7 +151,6 @@ const imageController = async (req, res, next) => {
         await newBanner.save()
       }
       saveToDb() // calling it 
-      console.log(newBanner)
       res.json({ message: "Working", fileURL });
     });
   } catch (error) {
