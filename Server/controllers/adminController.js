@@ -282,20 +282,20 @@ const UpdateProduct = async (req, res) => {
     if (size) {
       findProduct.size = size;
     }
-    if(quantity){
-      findProduct.quantity=quantity;
+    if (quantity) {
+      findProduct.quantity = quantity;
     }
-    if(animal){
-      findProduct.animal=animal;
+    if (animal) {
+      findProduct.animal = animal;
     }
-    if(parentId){
-      findProduct.parentId=parentId;
+    if (parentId) {
+      findProduct.parentId = parentId;
     }
-    if(coupon){
+    if (coupon) {
       findProduct.coupon;
     }
-    if(images){
-      findProduct.images=images;
+    if (images) {
+      findProduct.images = images;
     }
     await findProduct.save();
     res.status(200).json({ message: "Product Updated", findProduct })
@@ -304,7 +304,18 @@ const UpdateProduct = async (req, res) => {
   }
 }
 
-
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const findProduct = await Product.findOneAndDelete({ _id: id });
+    if (!findProduct) {
+      return res.status(400).json({ message: "Product Not Found" })
+    }
+    res.status(200).json({ message: "Deleted Product", findProduct })
+  } catch (error) {
+    res.status(400).json({ message: "Error Deleting Product" })
+  }
+}
 
 module.exports = {
   imageController,
@@ -321,4 +332,5 @@ module.exports = {
   getProductsByCategories,
   getOneProduct,
   UpdateProduct,
+  deleteProduct
 };
