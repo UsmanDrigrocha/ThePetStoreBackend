@@ -2,7 +2,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage(); // Store image data in memory
 const upload = multer({ storage: storage });
 const bannerModel = require('../models/bannerModel'); //banner model
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
 require('dotenv').config();
 const path = require('path')
 const userModel = require('../models/userModel');
@@ -74,7 +74,7 @@ const createCategory = async (req, res) => {
       });
 
       if (req.body.parentId) {
-        const parentId =new mongoose.Types.ObjectId(req.body.parentId); // Convert string to ObjectID
+        const parentId = new mongoose.Types.ObjectId(req.body.parentId); // Convert string to ObjectID
         const findCategory = await Category.findOne({ _id: parentId });
 
         if (findCategory) {
@@ -83,9 +83,6 @@ const createCategory = async (req, res) => {
           return res.status(400).json({ message: "No Such parentId Exist" });
         }
       }
-
-
-
       // Save to the database
       await categoryData.save();
       res.json({ message: "Category Created Successfully", categoryData });
@@ -95,6 +92,24 @@ const createCategory = async (req, res) => {
   }
 };
 
+const readOneCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID" });
+    }
+    const objId = new mongoose.Types.ObjectId(id);
+    const data = await Category.findOne({ _id: objId }); // Change "id" to "_id"
+    
+    if (!data) {
+      res.status(404).json({ message: "Not Found" }); // Change status code to 404 for "Not Found"
+    } else {
+      res.status(200).json({ message: "Category Found", data: data }); // Change status code to 200 for "OK"
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error Getting Category !!!!", error: error.message }); // Change status code to 500 for "Internal Server Error"
+  }
+};
 
 
 
@@ -168,4 +183,5 @@ module.exports = {
   showBannerImg,
   createCategory,
   getProductCategories,
+  readOneCategory
 };
