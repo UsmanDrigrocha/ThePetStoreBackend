@@ -30,10 +30,8 @@ route.post('/change-password', userChangePassword); // Change Old Password ✅
 route.post('/reset-password', userResetPassword); // Send link to Email
 route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
 route.post('/updateProfile', addUserProfile) // Update User Profile Image
-route.post('/uploadImage', uploadImage)
-
-//protected routes
 route.get('/getAllCategories', getProductCategories)
+route.post('/uploadImage', uploadImage)
 
 
 module.exports = route;
