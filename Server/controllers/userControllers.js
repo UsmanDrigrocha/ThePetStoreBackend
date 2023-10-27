@@ -301,7 +301,7 @@ const store = multer.diskStorage({
     }
 });
 const uplod = multer({ storage: store, fileFilter: imageFilter });
-// Controller Function
+// ---------------------------- Controller Function
 const uploadImage = async (req, res) => {
     try {
         uplod.single('image')(req, res, (err) => {
