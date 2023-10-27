@@ -350,9 +350,9 @@ const addUserProfile = async (req, res) => {
 
         const updatedUser = await existingUser.save();
 
-        res.status(200).json({ message: "Category updated", data: updatedUser });
+        res.status(200).json({ message: "User Profile updated", data: updatedUser });
     } catch (error) {
-        res.status(500).json({ message: "Error updating category", error: error.message });
+        res.status(500).json({ message: "Error updating user profile", error: error.message });
     }
 }
 

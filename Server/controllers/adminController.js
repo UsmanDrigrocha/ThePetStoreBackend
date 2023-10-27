@@ -182,6 +182,23 @@ const getChildCategories = async (req, res) => {
   }
 }
 
+const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID" });
+    }
+
+    const objId = new mongoose.Types.ObjectId(id);
+    const existingCategory = await Category.findOneAndDelete(objId);
+
+    res.status(200).json({ message: "Category Deleted", data: existingCategory });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating category", error: error.message });
+  }
+};
+
 
 module.exports = {
   imageController,
@@ -191,5 +208,6 @@ module.exports = {
   getProductCategories,
   readOneCategory,
   updateCategory,
-  getChildCategories
+  getChildCategories,
+  deleteCategory
 };

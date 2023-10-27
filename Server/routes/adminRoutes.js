@@ -12,7 +12,8 @@ const {
     imageController,
     readOneCategory,
     updateCategory,
-    getChildCategories
+    getChildCategories,
+    deleteCategory
 } = require('../controllers/adminController');
 
 
@@ -24,6 +25,7 @@ route.get('/getProductCategories', getProductCategories)// validation
 route.get('/getOneCategory/:id', readOneCategory)
 route.put('/updateCategory/:id', updateCategory);
 route.get('/getChildCategories/:id', getChildCategories); // use /:id
+route.delete('/deleteCategory/:id',deleteCategory)
 
 
 
