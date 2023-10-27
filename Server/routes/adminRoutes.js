@@ -10,7 +10,6 @@ const {
     createCategory,
     getProductCategories,
     imageController,
-    createSubCategory,
 } = require('../controllers/adminController');
 
 
@@ -19,6 +18,4 @@ route.get('/getBannerImg', showBannerImg);
 route.get('/getRegistedUsers', showRegistedUsers);
 route.post('/createCatagory', createCategory)// Create Product Category -- only Admin
 route.get('/getProductCategories', getProductCategories)// validation
-route.post('/createProductSubCategory', createSubCategory)// validation
-
 module.exports = route;
