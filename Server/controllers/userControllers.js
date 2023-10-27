@@ -7,7 +7,8 @@ const mail = require('../utils/sendMail');
 const session = require('express-session');
 const bannerModel = require('../models/bannerModel');
 const multer = require('multer');
-const path = require('path')
+const path = require('path');
+const { Product } = require('../models/productModel');
 
 
 //Register Account
@@ -356,6 +357,21 @@ const addUserProfile = async (req, res) => {
     }
 }
 
+const addToWishlist = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID !!!" })
+        }
+        const addToWishlist = await Product.findOne({ _id: id });
+        if (!addToWishlist) {
+            return res.status(400).json({ message: "Product Not Exist" });
+        }
+        res.status(200).json({ message: "Product Added to wishlist", addToWishlist })
+    } catch (error) {
+        res.status(400).json({ message: "Error adding to wishlist" })
+    }
+}
 
 module.exports = {
     userRegister,
@@ -368,5 +384,6 @@ module.exports = {
     verifyOTP,
     uploadImage,
     addUserProfile,
+    addToWishlist,
 };
 

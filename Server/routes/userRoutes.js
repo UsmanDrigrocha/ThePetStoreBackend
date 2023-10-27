@@ -14,8 +14,9 @@ const {
     generateOTP,
     verifyOTP,
     addUserProfile,
-    updateUserProfile,
-    uploadImage
+    // updateUserProfile,
+    uploadImage,
+    addToWishlist
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -32,6 +33,6 @@ route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
 route.post('/updateProfile', addUserProfile) // Update User Profile Image
 route.get('/getAllCategories', getProductCategories)
 route.post('/uploadImage', uploadImage)
-
+route.post('/addToWishlist/:id', addToWishlist)
 
 module.exports = route;
