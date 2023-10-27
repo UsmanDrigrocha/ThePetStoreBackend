@@ -14,30 +14,34 @@ const categorySchema = new Schema({
     name: { type: String },
     date: { type: Date, default: Date.now },
     image: String,
-    parentId: { type: String }
 });
 
 
 // Product Schema
 const productSchema = new Schema({
-    name: String,
-    details: String,
-    images: [String],
+    name: { type: String, required: true },
+    description: {
+        type: [String],
+        required: true
+    },
+    images: {
+        type: [String],
+        required: true
+    },
     price: Number,
-    size: String,
+    size: String, // array
     quantity: Number,
+    date: { type: Date, default: Date.now },
     parentId: { type: String, required: true }, // Parent Required
-    animal: { type: String }, // Optional
-    brand: { type: String }, // Optional
+    animal: { type: String, required: true },
+    brand: { type: String, required: true },
     coupon: { type: String } // Optional
 });
 
 
-// Create models for the schemas
 const Category = mongoose.model('Category', categorySchema);
 const Product = mongoose.model('Product', productSchema);
 
-//Exporting 
 module.exports = {
     Category,
     Product,
