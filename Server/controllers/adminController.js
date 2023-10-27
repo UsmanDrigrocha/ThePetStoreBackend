@@ -135,7 +135,6 @@ const updateCategory = async (req, res) => {
     }
 
     const updatedCategory = await existingCategory.save();
-
     res.status(200).json({ message: "Category updated", data: updatedCategory });
   } catch (error) {
     res.status(500).json({ message: "Error updating category", error: error.message });
@@ -170,6 +169,19 @@ const imageController = async (req, res, next) => {
   }
 };
 
+const getChildCategories = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const findChildCategory = await Category.find({ parentId: id });
+    if (!findChildCategory) {
+      return res.status(200).json({ message: "Invalid ID / Not Exist" })
+    }
+    res.status(200).json({ message: "Getting Child Categories", child: findChildCategory });
+  } catch (error) {
+    res.status(400).json({ message: "Error Getting Child Categories" })
+  }
+}
+
 
 module.exports = {
   imageController,
@@ -178,5 +190,6 @@ module.exports = {
   createCategory,
   getProductCategories,
   readOneCategory,
-  updateCategory
+  updateCategory,
+  getChildCategories
 };

@@ -11,7 +11,8 @@ const {
     getProductCategories,
     imageController,
     readOneCategory,
-    updateCategory
+    updateCategory,
+    getChildCategories
 } = require('../controllers/adminController');
 
 
@@ -22,7 +23,7 @@ route.post('/createCatagory', createCategory)// Create Product Category -- only 
 route.get('/getProductCategories', getProductCategories)// validation
 route.get('/getOneCategory/:id', readOneCategory)
 route.put('/updateCategory/:id', updateCategory);
-
+route.get('/getChildCategories/:id', getChildCategories); // use /:id
 
 
 
