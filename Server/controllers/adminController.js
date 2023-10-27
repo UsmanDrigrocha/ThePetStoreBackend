@@ -1,7 +1,7 @@
 const multer = require('multer');
 const storage = multer.memoryStorage(); // Store image data in memory
 const upload = multer({ storage: storage });
-const bannerModel = require('../models/bannerModel'); 
+const bannerModel = require('../models/bannerModel');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const path = require('path')
@@ -235,7 +235,18 @@ const getAllProducts = async (req, res) => {
   }
 }
 
-
+const getProductsByCategories = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const findProducts = await Product.find({ parentId: id });
+    if (!findProducts) {
+      return res.status(200).json({ message: "Invalid ID / Not Exist" })
+    }
+    res.status(200).json({ message: "Getting Products by Categories", products: findProducts });
+  } catch (error) {
+    res.status(400).json({ message: "Error Getting Products by categories" })
+  }
+}
 
 module.exports = {
   imageController,
@@ -249,4 +260,5 @@ module.exports = {
   deleteCategory,
   createProduct,
   getAllProducts,
+  getProductsByCategories,
 };

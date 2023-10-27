@@ -15,7 +15,8 @@ const {
     getChildCategories,
     deleteCategory,
     createProduct,
-    getAllProducts
+    getAllProducts,
+    getProductsByCategories
 } = require('../controllers/adminController');
 
 
@@ -30,7 +31,7 @@ route.get('/getChildCategories/:id', getChildCategories); // use /:id
 route.delete('/deleteCategory/:id',deleteCategory)
 route.post('/createProduct',createProduct)
 route.get('/getAllProducts',getAllProducts)
-
+route.get('/getProductsByCategories/:id',getProductsByCategories) ///:id
 
 
 
