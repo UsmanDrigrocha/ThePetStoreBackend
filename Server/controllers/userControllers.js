@@ -302,41 +302,18 @@ const store = multer.diskStorage({
 });
 const uplod = multer({ storage: store, fileFilter: imageFilter });
 // Controller Function
-const addUserProfile = async (req, res) => {
+const uploadImage = async (req, res) => {
     try {
         uplod.single('image')(req, res, (err) => {
             if (!req?.file) {
                 return res.status(200).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
             }
 
-            const { email } = req.body;
-            if (!email) {
-                return res.status(200).json({ message: "Enter all fields" })
-            }
             const fileType = req.file.mimetype;
             const fileName = req.file.filename;
             const fileURL = `${fileName}`;
 
-
-
-            try {
-                const saveToDb = async () => {
-                    const findUser = await userModel.findOne({ email: email });
-                    if (!findUser) {
-                        return res.status(400).json({ message: "User Not registered" })
-                    } else {
-                        const userProfileImage = await userModel.findOneAndUpdate({ email: email }, {
-                            profileImage: fileURL
-                        });
-                        res.json({ message: "Profile Pic Updated", fileURL });
-                    }
-                }
-                saveToDb() // calling it 
-
-            } catch (error) {
-                console.log(error)
-                res.status(400).json({ message: "User Not found" })
-            }
+            res.status(200).json({ message: "Image Uploaded to Server", url: fileURL })
         });
     } catch (error) {
         res.status(400).json({ message: "Error Uploading User Profile" })
@@ -344,7 +321,40 @@ const addUserProfile = async (req, res) => {
 }
 
 
+const addUserProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, image, email } = req.body;
 
+        if (!email) {
+            return res.status(400).json({ message: "Enter Email" });
+        }
+
+
+        const existingUser = await userModel.findOne({ email: email });
+
+        if (!existingUser) {
+            return res.status(404).json({ message: "User not Exist" });
+        }
+
+        // Check if the fields are provided and update only if they exist in the request
+        if (name) {
+            existingUser.name = name;
+        }
+        if (image) {
+            existingUser.profileImage = image;
+        }
+        if (email) {
+            existingUser.email = email;
+        }
+
+        const updatedUser = await existingUser.save();
+
+        res.status(200).json({ message: "Category updated", data: updatedUser });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating category", error: error.message });
+    }
+}
 
 
 module.exports = {
@@ -356,5 +366,7 @@ module.exports = {
     showBannerImg,
     generateOTP,
     verifyOTP,
+    uploadImage,
     addUserProfile,
 };
+

@@ -49,46 +49,39 @@ const showBannerImg = async (req, res) => {
 
 const createCategory = async (req, res) => {
   try {
-    // Handle file upload
-    uplod.single('image')(req, res, async (err) => {
-      if (!req?.file) {
-        return res.status(400).json({ message: "Enter Image" });
-      }
-      if (err) {
-        return res.status(400).json({ message: err.message });
-      }
 
-      const { name } = req.body;
-      if (!name) {
-        return res.status(400).json({ message: "Enter Name of Category !!!" });
-      }
+    const { name, image } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: "Enter Name of Category !!!" });
+    }
+    if (!image) {
+      return res.status(400).json({ message: "Enter Image of Category !!!" });
+    }
 
-      const fileType = req.file.mimetype;
-      const fileName = req.file.filename;
-      // Construct the complete URL
-      const fileURL = `${fileName}`;
-
-      const categoryData = new Category({
-        name: name,
-        image: fileURL,
-      });
-
-      if (req.body.parentId) {
-        const parentId = new mongoose.Types.ObjectId(req.body.parentId); // Convert string to ObjectID
-        const findCategory = await Category.findOne({ _id: parentId });
-
-        if (findCategory) {
-          categoryData.parentId = parentId;
-        } else {
-          return res.status(400).json({ message: "No Such parentId Exist" });
-        }
-      }
-      // Save to the database
-      await categoryData.save();
-      res.json({ message: "Category Created Successfully", categoryData });
+    const categoryData = new Category({
+      name: name,
+      image: image,
     });
-  } catch (error) {
-    res.status(400).json({ message: "Error Testing Img Upload" });
+
+    if (req.body.parentId) {
+      const parentId = new mongoose.Types.ObjectId(req.body.parentId); // Convert string to ObjectID
+      const findCategory = await Category.findOne({ _id: parentId });
+
+
+      if (findCategory) {
+        categoryData.parentId = parentId;
+      } else {
+        return res.status(400).json({ message: "No Such parentId Exist" });
+      }
+    }
+
+    // Save to the database
+    await categoryData.save();
+    res.json({ message: "Category Created Successfully", categoryData });
+  }
+  catch (error) {
+    console.log(error.message)
+    res.status(400).json({ message: "Error Creating Category" });
   }
 };
 
@@ -100,7 +93,7 @@ const readOneCategory = async (req, res) => {
     }
     const objId = new mongoose.Types.ObjectId(id);
     const data = await Category.findOne({ _id: objId }); // Change "id" to "_id"
-    
+
     if (!data) {
       res.status(404).json({ message: "Not Found" }); // Change status code to 404 for "Not Found"
     } else {
@@ -111,6 +104,43 @@ const readOneCategory = async (req, res) => {
   }
 };
 
+const updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, image, parentId } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID" });
+    }
+
+    const objId = new mongoose.Types.ObjectId(id);
+    const existingCategory = await Category.findById(objId);
+
+    if (!existingCategory) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const currentDate = new Date();
+    console.log(currentDate);
+
+    // Check if the fields are provided and update only if they exist in the request
+    if (name) {
+      existingCategory.name = name;
+    }
+    if (image) {
+      existingCategory.image = image;
+    }
+    if (parentId) {
+      existingCategory.parentId = parentId;
+    }
+
+    const updatedCategory = await existingCategory.save();
+
+    res.status(200).json({ message: "Category updated", data: updatedCategory });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating category", error: error.message });
+  }
+};
 
 
 const getProductCategories = async (req, res) => {
@@ -183,5 +213,6 @@ module.exports = {
   showBannerImg,
   createCategory,
   getProductCategories,
-  readOneCategory
+  readOneCategory,
+  updateCategory
 };

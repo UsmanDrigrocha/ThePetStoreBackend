@@ -11,6 +11,7 @@ require('./config/db')
 
 app.use(express.json());
 app.use(cors());
+app.use(express.urlencoded({extended : true}))
 
 app.use(
   session({
@@ -37,3 +38,5 @@ app.listen(port, () => {
 app.get('/', (req, res) => {
   res.status(200).json({ message: "Server Working Properly", project: "ThePetStore Backend" });
 });
+
+
