@@ -154,57 +154,21 @@ const getProductCategories = async (req, res) => {
 };
 
 
-//################### Image Controller Logic -- Create;  ----- Upload Banner
-const port = process.env.PORT;
-const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg'];
-const imageFilter = (req, file, cb) => {
-  if (allowedImageTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!'), false);
-  }
-};
-const store = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './public/uploads');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const fileExtension = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
-  }
-});
-const uplod = multer({ storage: store, fileFilter: imageFilter });
+
 // Controller Function ----- Upload Banner
 const imageController = async (req, res, next) => {
   try {
-    uplod.single('image')(req, res, (err) => {
-      if (!req?.file) {
-        return res.status(200).json({ message: "Enter Image" });
-      }
-      if (err) {
-        return res.status(400).json({ message: err.message });
-      }
+    const { fileURL } = req.body;
+    const newBanner = new bannerModel({
+      image: fileURL
+    })
 
-
-      const fileType = req.file.mimetype;
-      const fileName = req.file.filename;
-      // Construct the complete URL
-      const fileURL = `${fileName}`;
-      const newBanner = new bannerModel({
-        image: fileURL
-      })
-      const saveToDb = async () => {
-        await newBanner.save()
-      }
-      saveToDb() // calling it 
-      res.json({ message: "File Uploaded Successfully", fileURL });
-    });
+    await newBanner.save()
+    res.json({ message: "Banner Created Successfully", fileURL });
   } catch (error) {
     res.status(400).json({ message: "Error Testing Img Upload" });
   }
 };
-
 
 
 module.exports = {

@@ -15,7 +15,7 @@ const {
 } = require('../controllers/adminController');
 
 
-route.post('/upload', imageController);// Upload Banner Images  -- only Admin
+route.post('/uploadBannerImage', imageController);// Upload Banner Images  -- only Admin
 route.get('/getBannerImg', showBannerImg);
 route.get('/getRegistedUsers', showRegistedUsers);
 route.post('/createCatagory', createCategory)// Create Product Category -- only Admin
