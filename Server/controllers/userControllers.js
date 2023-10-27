@@ -344,18 +344,6 @@ const addUserProfile = async (req, res) => {
 }
 
 
-// Update User Profile;
-// const updateUserProfile = async (req, res) => {
-//     try {
-//         const { name } = req.body;
-//         console.log(req.body)
-//         res.status(200).json({ message: "Updating User Profile", status: name })
-//     } catch (error) {
-//         console.log(error.message)
-//         res.status(400).json({ message: "Error Updating user Profile" })
-//     }
-// }
-
 
 
 
@@ -369,5 +357,4 @@ module.exports = {
     generateOTP,
     verifyOTP,
     addUserProfile,
-
 };

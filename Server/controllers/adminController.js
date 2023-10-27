@@ -169,5 +169,4 @@ module.exports = {
   showBannerImg,
   createCategory,
   getProductCategories,
-  // createSubCategory
 };

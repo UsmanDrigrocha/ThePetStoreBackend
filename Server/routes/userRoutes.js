@@ -31,7 +31,7 @@ route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
 route.post('/updateProfile',addUserProfile) // use :/id
 
 //protected routes
-route.get('/getAllCategories',validateToken,getProductCategories)
+route.get('/getAllCategories',getProductCategories)
 
 
 module.exports = route;
