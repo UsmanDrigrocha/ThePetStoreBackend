@@ -1,7 +1,7 @@
 const multer = require('multer');
 const storage = multer.memoryStorage(); // Store image data in memory
 const upload = multer({ storage: storage });
-const bannerModel = require('../models/bannerModel'); //banner model
+const bannerModel = require('../models/bannerModel'); 
 const mongoose = require('mongoose');
 require('dotenv').config();
 const path = require('path')
@@ -75,7 +75,6 @@ const createCategory = async (req, res) => {
       }
     }
 
-    // Save to the database
     await categoryData.save();
     res.json({ message: "Category Created Successfully", categoryData });
   }
@@ -122,8 +121,6 @@ const updateCategory = async (req, res) => {
 
     const currentDate = new Date();
     console.log(currentDate);
-
-    // Check if the fields are provided and update only if they exist in the request
     if (name) {
       existingCategory.name = name;
     }
@@ -152,7 +149,6 @@ const getProductCategories = async (req, res) => {
   }
 };
 
-// Controller Function ----- Upload Banner
 const imageController = async (req, res, next) => {
   try {
     const { fileURL } = req.body;
