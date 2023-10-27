@@ -17,7 +17,8 @@ const {
     createProduct,
     getAllProducts,
     getProductsByCategories,
-    getOneProduct
+    getOneProduct,
+    UpdateProduct,
 } = require('../controllers/adminController');
 
 
@@ -34,6 +35,6 @@ route.post('/createProduct', createProduct)
 route.get('/getAllProducts', getAllProducts)
 route.get('/getProductsByCategories/:id', getProductsByCategories)
 route.get('/getOneProduct/:id', getOneProduct)
-
+route.put('/updateProduct/:id',UpdateProduct)
 
 module.exports = route;
