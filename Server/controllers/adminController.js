@@ -152,8 +152,6 @@ const getProductCategories = async (req, res) => {
   }
 };
 
-
-
 // Controller Function ----- Upload Banner
 const imageController = async (req, res, next) => {
   try {
@@ -232,13 +230,15 @@ const createProduct = async (req, res) => {
   }
 }
 
-const getAllProducts = async (req,res)=>{
+const getAllProducts = async (req, res) => {
   try {
-    res.status(200).json({message:"Products Found"})
+    const data = await Product.find({})
+    res.status(200).json({ message: "Products Found", Products: data })
   } catch (error) {
-    res.status(400).json({message:"Error Getting All Products"})
+    res.status(400).json({ message: "Error Getting All Products" })
   }
 }
+
 
 
 module.exports = {
