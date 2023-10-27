@@ -20,18 +20,18 @@ const {
 } = require('../controllers/adminController');
 
 
-route.post('/uploadBannerImage', imageController);// Upload Banner Images  -- only Admin
+route.post('/uploadBannerImage', imageController);
 route.get('/getBannerImg', showBannerImg);
 route.get('/getRegistedUsers', showRegistedUsers);
-route.post('/createCatagory', createCategory)// Create Product Category -- only Admin
-route.get('/getProductCategories', getProductCategories)// validation
+route.post('/createCatagory', createCategory)
+route.get('/getProductCategories', getProductCategories)
 route.get('/getOneCategory/:id', readOneCategory)
 route.put('/updateCategory/:id', updateCategory);
-route.get('/getChildCategories/:id', getChildCategories); // use /:id
+route.get('/getChildCategories/:id', getChildCategories);
 route.delete('/deleteCategory/:id',deleteCategory)
 route.post('/createProduct',createProduct)
 route.get('/getAllProducts',getAllProducts)
-route.get('/getProductsByCategories/:id',getProductsByCategories) ///:id
+route.get('/getProductsByCategories/:id',getProductsByCategories)
 
 
 
