@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const storage = multer.memoryStorage(); // Store image data in memory
 const upload = multer({ storage: storage });
@@ -11,8 +12,6 @@ const {
   Product,
 } = require('../models/productModel');
 
-
-const jwt = require('jsonwebtoken');
 
 const showRegistedUsers = async (req, res) => {
   try {
