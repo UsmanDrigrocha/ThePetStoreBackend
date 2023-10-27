@@ -18,7 +18,6 @@ const showRegistedUsers = async (req, res) => {
   try {
     try {
       const data = await userModel.find({})
-      console.log(data)
       res.status(200).json(data);
     } catch (error) {
       console.log(error)
