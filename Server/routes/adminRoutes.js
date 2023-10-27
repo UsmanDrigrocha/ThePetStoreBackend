@@ -13,7 +13,8 @@ const {
     readOneCategory,
     updateCategory,
     getChildCategories,
-    deleteCategory
+    deleteCategory,
+    createProduct
 } = require('../controllers/adminController');
 
 
@@ -26,8 +27,7 @@ route.get('/getOneCategory/:id', readOneCategory)
 route.put('/updateCategory/:id', updateCategory);
 route.get('/getChildCategories/:id', getChildCategories); // use /:id
 route.delete('/deleteCategory/:id',deleteCategory)
-
-
+route.post('/createProduct',createProduct)
 
 
 

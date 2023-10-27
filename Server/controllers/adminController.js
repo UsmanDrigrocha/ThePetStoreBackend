@@ -199,6 +199,47 @@ const deleteCategory = async (req, res) => {
   }
 };
 
+const createProduct = async (req, res) => {
+  try {
+    const { name, price, description, size, quantity, animal, parentId, coupon, images } = req.body;
+    if (!name || !price || !description || !size || !quantity || !parentId || !animal || !images) {
+      return res.status(400).json({ message: "Enter all Fields" })
+    } else {
+      const objId = new mongoose.Types.ObjectId(parentId);
+      const existingCategory = await Category.findById(objId);
+      if (!existingCategory) {
+        return res.status(400).json({ message: "No Such Parent Exist" });
+      }
+      const newProduct = new Product({
+        name,
+        price,
+        description,
+        quantity,
+        animal,
+        size,
+        parentId,
+        images
+      })
+      if (coupon) {
+        newProduct.coupon = coupon;
+      }
+      await newProduct.save();
+      res.status(201).json({ message: "Product Created !", Product: newProduct })
+    }
+  } catch (error) {
+    console.log(error.message)
+    res.status(400).json({ message: "Error creating Product" });
+  }
+}
+
+const getAllProducts = async (req,res)=>{
+  try {
+    res.status(200).json({message:"Products Found"})
+  } catch (error) {
+    res.status(400).json({message:"Error Getting All Products"})
+  }
+}
+
 
 module.exports = {
   imageController,
@@ -209,5 +250,7 @@ module.exports = {
   readOneCategory,
   updateCategory,
   getChildCategories,
-  deleteCategory
+  deleteCategory,
+  createProduct,
+  getAllProducts,
 };

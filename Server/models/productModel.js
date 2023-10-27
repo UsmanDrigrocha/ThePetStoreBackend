@@ -14,6 +14,7 @@ const categorySchema = new Schema({
     name: { type: String },
     date: { type: Date, default: Date.now },
     image: String,
+    parentId: { type: String, required: true }
 });
 
 
@@ -21,7 +22,7 @@ const categorySchema = new Schema({
 const productSchema = new Schema({
     name: { type: String, required: true },
     description: {
-        type: [String],
+        type: String,
         required: true
     },
     images: {
@@ -34,7 +35,7 @@ const productSchema = new Schema({
     date: { type: Date, default: Date.now },
     parentId: { type: String, required: true }, // Parent Required
     animal: { type: String, required: true },
-    brand: { type: String, required: true },
+    // brand: { type: String, required: true },  // because brand is a category ;
     coupon: { type: String } // Optional
 });
 
