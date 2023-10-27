@@ -45,7 +45,6 @@ const showBannerImg = async (req, res) => {
   }
 };
 
-
 const createCategory = async (req, res) => {
   try {
 
