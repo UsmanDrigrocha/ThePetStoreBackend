@@ -248,6 +248,20 @@ const getProductsByCategories = async (req, res) => {
   }
 }
 
+const getOneProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const findProduct = await Product.findOne({ _id: id });
+    if (!findProduct) {
+      return res.status(400).json({ message: "Product Not Found" })
+    }
+    res.status(200).json({ message: "Product Found" ,findProduct})
+  } catch (error) {
+    res.status(400).json({ message: "Error Getting Product" })
+
+  }
+}
+
 module.exports = {
   imageController,
   showRegistedUsers,
@@ -261,4 +275,5 @@ module.exports = {
   createProduct,
   getAllProducts,
   getProductsByCategories,
+  getOneProduct,
 };

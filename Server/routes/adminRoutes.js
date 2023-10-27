@@ -16,7 +16,8 @@ const {
     deleteCategory,
     createProduct,
     getAllProducts,
-    getProductsByCategories
+    getProductsByCategories,
+    getOneProduct
 } = require('../controllers/adminController');
 
 
@@ -28,11 +29,11 @@ route.get('/getProductCategories', getProductCategories)
 route.get('/getOneCategory/:id', readOneCategory)
 route.put('/updateCategory/:id', updateCategory);
 route.get('/getChildCategories/:id', getChildCategories);
-route.delete('/deleteCategory/:id',deleteCategory)
-route.post('/createProduct',createProduct)
-route.get('/getAllProducts',getAllProducts)
-route.get('/getProductsByCategories/:id',getProductsByCategories)
-
+route.delete('/deleteCategory/:id', deleteCategory)
+route.post('/createProduct', createProduct)
+route.get('/getAllProducts', getAllProducts)
+route.get('/getProductsByCategories/:id', getProductsByCategories)
+route.get('/getOneProduct/:id', getOneProduct)
 
 
 module.exports = route;
