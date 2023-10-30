@@ -324,7 +324,7 @@ const uploadImage = async (req, res) => {
     }
 }
 
-
+// Update User Profile
 const addUserProfile = async (req, res) => {
     try {
         const { id } = req.params;
@@ -341,7 +341,6 @@ const addUserProfile = async (req, res) => {
             return res.status(404).json({ message: "User not Exist" });
         }
 
-        // Check if the fields are provided and update only if they exist in the request
         if (name) {
             existingUser.name = name;
         }
@@ -360,6 +359,7 @@ const addUserProfile = async (req, res) => {
     }
 }
 
+// Add to wishlist
 const addToWishlist = async (req, res) => {
     try {
         const { id } = req.params;
@@ -399,7 +399,7 @@ const addToWishlist = async (req, res) => {
     }
 };
 
-
+// Delete Item from wishlist
 const deleteWishlist = async (req, res) => {
     try {
         const { id } = req.params;
@@ -438,6 +438,7 @@ const deleteWishlist = async (req, res) => {
     }
 };
 
+// Get all items from wishlist
 const getAllWishlist = async (req, res) => {
     try {
         const { id } = req.params;
@@ -457,6 +458,7 @@ const getAllWishlist = async (req, res) => {
     }
 }
 
+// Add User Addresses
 const addAddress = async (req, res) => {
     try {
         const { id } = req.params;
@@ -480,6 +482,7 @@ const addAddress = async (req, res) => {
     }
 }
 
+// Get All User Addresses
 const readAddresses = async (req, res) => {
     try {
         const { id } = req.params;
@@ -498,6 +501,7 @@ const readAddresses = async (req, res) => {
     }
 }
 
+// Update User Addresses
 const updateUserAddresses = async (req, res) => {
     try {
         const { id } = req.params;
@@ -526,6 +530,7 @@ const updateUserAddresses = async (req, res) => {
     }
 }
 
+// Get New Arrivals : New Products (Less than 30 Days)
 const newArrivals = async (req, res) => {
     try {
         const daysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
@@ -537,36 +542,10 @@ const newArrivals = async (req, res) => {
     }
 };
 
-// const addToCart = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const { email, quantity } = req.body;
-
-//         if (!id || !quantity) {
-//             return res.status(400).json({ error: 'Product ID and quantity are required.' });
-//         }
-//         const user = await userModel.findOne({ email: email });
-//         if (!user) {
-//             return res.status(404).json({ error: 'User not found.' });
-//         }
-
-//         const findProduct = await Product.findOne({ _id: id });
-//         if (!findProduct) {
-//             return res.status(400).json({ message: "Product Not Found" });
-//         }
-
-//         res.status(200).json({ message: 'Item added to cart successfully.', });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Error In Adding To Cart' });
-//     }
-// };
-
-
-
+// Update User Cart :item
 const updateCartItem = async (req, res) => {
     try {
-        const { id } = req.params; // Product ID
+        const { id } = req.params;
         const { email, quantity } = req.body;
         if (quantity <= 0) {
             return res.status(400).json({ error: 'Invalid quantity' });
@@ -607,6 +586,7 @@ const updateCartItem = async (req, res) => {
     }
 };
 
+// Delete item from cart
 const deleteCartItem = async (req, res) => {
     try {
         const { id } = req.params;
@@ -636,6 +616,7 @@ const deleteCartItem = async (req, res) => {
     }
 };
 
+// Add item to cart
 const addToCart = async (req, res) => {
     try {
         const { id } = req.params;
@@ -674,8 +655,6 @@ const addToCart = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
-
-// const createOffer
 
 
 module.exports = {
