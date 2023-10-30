@@ -18,7 +18,11 @@ const {
     uploadImage,
     addToWishlist,
     deleteWishlist,
-    getAllWishlist
+    getAllWishlist,
+    addAddress,
+    readAddresses,
+    updateUserAddresses,
+    newArrivals
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -36,8 +40,11 @@ route.post('/updateProfile', addUserProfile) // Update User Profile Image
 route.get('/getAllCategories', getProductCategories)
 route.post('/uploadImage', uploadImage)
 route.post('/addToWishlist/:id', addToWishlist)
-route.post('/removeFromWishlist/:id',deleteWishlist)
-route.get('/getAllWishlist/:id',getAllWishlist)
-
+route.post('/removeFromWishlist/:id', deleteWishlist)
+route.get('/getAllWishlist/:id', getAllWishlist)
+route.post('/addAddress/:id', addAddress)
+route.get('/getUserAddresses/:id', readAddresses)
+route.post('/updateUserAddresses/:id', updateUserAddresses)
+route.get('/newArrivals',newArrivals)
 
 module.exports = route;

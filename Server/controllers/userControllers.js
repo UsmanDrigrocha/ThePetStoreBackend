@@ -456,6 +456,86 @@ const getAllWishlist = async (req, res) => {
     }
 }
 
+const addAddress = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { addresses } = req.body;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" })
+        }
+        if (!addresses) {
+            return res.status(400).json({ message: "Enter Address" })
+        }
+        const findUser = await userModel.findOne({ _id: id });
+        if (!findUser) {
+            return res.status(400).json({ message: "User Not Exist" })
+        }
+
+        findUser.addresses = addresses;
+        await findUser.save();
+        res.status(200).json({ message: "Address Added", Address: addresses })
+    } catch (error) {
+        res.status(400).json({ message: "Error Adding Addresses" })
+    }
+}
+
+const readAddresses = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" })
+        }
+        const findUser = await userModel.findOne({ _id: id });
+        if (!findUser) {
+            return res.status(400).json({ message: "User Doesn't Exist" })
+        }
+
+        const data = findUser.addresses;
+        res.status(200).json({ Addresses: data })
+    } catch (error) {
+        res.status(400).json({ message: "Error Reading Addresses" })
+    }
+}
+
+const updateUserAddresses = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" });
+        }
+        const { addresses } = req.body;
+        if (!addresses) {
+            return res.status(400).json({ message: "Enter Address" })
+        }
+        const findUser = await userModel.findOneAndUpdate({ _id: id }, {
+            addresses
+        });
+
+        if (!findUser) {
+            return res.status(400).json({ message: "User Not Registered" });
+        }
+
+        const data = await userModel.findOne({ _id: id });
+
+
+        res.status(400).json({ message: "User Addresses Updated", Addresses: data.addresses })
+
+    } catch (error) {
+        res.status(400).json({ message: "Error Updating Addresses" })
+    }
+}
+
+const newArrivals = async (req, res) => {
+    try {
+        const daysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
+        const newArrivals = await Product.find({ date: { $gte: daysAgo } }).exec();
+        res.status(200).json({ message: "New Arrivals Found",NewArrivals :newArrivals })
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: 'Error Getting New Arrivals' });
+    }
+};
+
 
 
 module.exports = {
@@ -471,6 +551,10 @@ module.exports = {
     addUserProfile,
     addToWishlist,
     deleteWishlist,
-    getAllWishlist
+    getAllWishlist,
+    addAddress,
+    readAddresses,
+    updateUserAddresses,
+    newArrivals
 };
 
