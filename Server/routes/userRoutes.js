@@ -16,7 +16,9 @@ const {
     addUserProfile,
     // updateUserProfile,
     uploadImage,
-    addToWishlist
+    addToWishlist,
+    deleteWishlist,
+    getAllWishlist
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -34,5 +36,8 @@ route.post('/updateProfile', addUserProfile) // Update User Profile Image
 route.get('/getAllCategories', getProductCategories)
 route.post('/uploadImage', uploadImage)
 route.post('/addToWishlist/:id', addToWishlist)
+route.post('/removeFromWishlist/:id',deleteWishlist)
+route.get('/getAllWishlist/:id',getAllWishlist)
+
 
 module.exports = route;

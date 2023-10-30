@@ -39,7 +39,8 @@ const userRegister = async (req, res) => {
                         createdAt: null,
                         expiresAt: null,
                         profileImage: null,
-                        wishlist: null
+                        wishlist: null,
+                        addresses: null
                     });
 
                     try {
@@ -379,6 +380,10 @@ const addToWishlist = async (req, res) => {
             return res.status(400).json({ message: "Product not found" });
         }
 
+        if (!findUser.wishlist) {
+            findUser.wishlist = [];
+        }
+
         if (findUser.wishlist.includes(id)) {
             return res.status(400).json({ message: "Product is already in the wishlist" });
         }
@@ -394,6 +399,65 @@ const addToWishlist = async (req, res) => {
 };
 
 
+const deleteWishlist = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { email } = req.body;
+
+        if (!id || !email) {
+            return res.status(400).json({ message: "Please provide both ID and Email" });
+        }
+
+        const findUser = await userModel.findOne({ email });
+
+        if (!findUser) {
+            return res.status(400).json({ message: "User with this email is not registered" });
+        }
+
+        const findProduct = await Product.findOne({ _id: id });
+
+        if (!findProduct) {
+            return res.status(400).json({ message: "Product not found" });
+        }
+
+        if (!findUser.wishlist) {
+            findUser.wishlist = [];
+        }
+
+        if (findUser.wishlist.includes(id)) {
+            findUser.wishlist = null;
+            await findUser.save();
+            res.status(200).json({ message: "Product Deleted from wishlist", product: findProduct });
+        } else {
+            return res.status(400).json({ message: "Product not exist in wishlist" })
+        }
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: "Error deleting from wishlist" });
+    }
+};
+
+const getAllWishlist = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter id" })
+        }
+
+        const findUser = await userModel.findOne({ _id: id });
+        if (!findUser) {
+            return res.status(400).json({ message: "id not registered" });
+        }
+        const wishlist = findUser.wishlist;
+        res.status(200).json({ message: "Wishlist", wishlist: wishlist })
+    }
+    catch (error) {
+        res.status(400).json({ message: "Error Getting Wishlist" })
+    }
+}
+
+
+
 module.exports = {
     userRegister,
     userLogin,
@@ -406,5 +470,7 @@ module.exports = {
     uploadImage,
     addUserProfile,
     addToWishlist,
+    deleteWishlist,
+    getAllWishlist
 };
 
