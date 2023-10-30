@@ -40,7 +40,8 @@ const userRegister = async (req, res) => {
                         expiresAt: null,
                         profileImage: null,
                         wishlist: null,
-                        addresses: null
+                        addresses: null,
+                        cart: null,
                     });
 
                     try {
@@ -529,13 +530,152 @@ const newArrivals = async (req, res) => {
     try {
         const daysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
         const newArrivals = await Product.find({ date: { $gte: daysAgo } }).exec();
-        res.status(200).json({ message: "New Arrivals Found",NewArrivals :newArrivals })
+        res.status(200).json({ message: "New Arrivals Found", NewArrivals: newArrivals })
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ error: 'Error Getting New Arrivals' });
     }
 };
 
+// const addToCart = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { email, quantity } = req.body;
+
+//         if (!id || !quantity) {
+//             return res.status(400).json({ error: 'Product ID and quantity are required.' });
+//         }
+//         const user = await userModel.findOne({ email: email });
+//         if (!user) {
+//             return res.status(404).json({ error: 'User not found.' });
+//         }
+
+//         const findProduct = await Product.findOne({ _id: id });
+//         if (!findProduct) {
+//             return res.status(400).json({ message: "Product Not Found" });
+//         }
+
+//         res.status(200).json({ message: 'Item added to cart successfully.', });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Error In Adding To Cart' });
+//     }
+// };
+
+
+
+const updateCartItem = async (req, res) => {
+    try {
+        const { id } = req.params; // Product ID
+        const { email, quantity } = req.body;
+        if (quantity <= 0) {
+            return res.status(400).json({ error: 'Invalid quantity' });
+        }
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (!user.cart) {
+            user.cart = [];
+        }
+
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+
+        const cartItem = user.cart.find((item) => item.productID.toString() === id);
+
+        if (cartItem) {
+            cartItem.quantity += quantity;
+        } else {
+            user.cart.push({ productID: product._id, quantity });
+        }
+        if (user.cart[0] > product.quantity) {
+            return res.status(400).json({ error: 'This Quantity is not available in stock' });
+        }
+
+        await user.save();
+
+        return res.status(200).json({ message: 'Product added to cart', Cart: user.cart });
+    } catch (err) {
+        console.log(err.message)
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+const deleteCartItem = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { email } = req.body
+        if (!id || !email) {
+            return res.status(400).json({ message: "Enter All Fields" })
+        }
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const cartItemIndex = user.cart.findIndex((item) => item.productID.toString() === id);
+
+        if (cartItemIndex === -1) {
+            return res.status(404).json({ error: 'Item not found in cart' });
+        }
+
+        user.cart.splice(cartItemIndex, 1);
+        await user.save();
+
+        return res.status(200).json({ message: 'Cart item deleted', Cart: user.cart });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+const addToCart = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { quantity, email } = req.body;
+        if (!email || !quantity) {
+            return res.status(400).json({ message: "Enter All Fields" })
+        }
+        if (quantity <= 0) {
+            return res.status(400).json({ error: 'Invalid quantity' });
+        }
+
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const cartItem = user.cart.find((item) => item.productID.toString() === id);
+
+        if (!cartItem) {
+            return res.status(404).json({ error: 'Item not found in cart' });
+        }
+
+        const product = await Product.findById(cartItem.productID);
+
+        if (product.quantity < quantity) {
+            return res.status(400).json({ error: 'This Quantity is not available in stock' });
+        }
+
+        cartItem.quantity = quantity;
+        await user.save();
+
+        return res.status(200).json({ message: 'Cart item quantity updated', Cart: user.cart });
+    } catch (err) {
+        console.log(err.message);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// const createOffer
 
 
 module.exports = {
@@ -555,6 +695,9 @@ module.exports = {
     addAddress,
     readAddresses,
     updateUserAddresses,
-    newArrivals
+    newArrivals,
+    addToCart,
+    deleteCartItem,
+    updateCartItem,
 };
 

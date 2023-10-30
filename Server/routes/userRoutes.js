@@ -22,7 +22,10 @@ const {
     addAddress,
     readAddresses,
     updateUserAddresses,
-    newArrivals
+    newArrivals,
+    addToCart,
+    deleteCartItem,
+    updateCartItem
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -46,5 +49,8 @@ route.post('/addAddress/:id', addAddress)
 route.get('/getUserAddresses/:id', readAddresses)
 route.post('/updateUserAddresses/:id', updateUserAddresses)
 route.get('/newArrivals',newArrivals)
+route.post('/addToCart/:id',addToCart)
+route.post('/deleteCartItem/:id',deleteCartItem)
+route.post('/updateCartItem/:id',updateCartItem)
 
 module.exports = route;
