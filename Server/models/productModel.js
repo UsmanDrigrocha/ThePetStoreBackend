@@ -38,12 +38,7 @@ const productSchema = new Schema({
     coupon: { type: String } // Optional
 });
 
-const wishlistSchema = new Schema({
-    product: { type: String, required: true }
-})
 
-
-const Wishlist = mongoose.model('Wishlist', wishlistSchema)
 const Category = mongoose.model('Category', categorySchema);
 const Product = mongoose.model('Product', productSchema);
 
@@ -51,7 +46,6 @@ const Product = mongoose.model('Product', productSchema);
 module.exports = {
     Category,
     Product,
-    Wishlist,
 };
 
 // create one schema which take name , image & id of parent (optional); if it has id then it is child else it is parent ;

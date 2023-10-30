@@ -19,7 +19,11 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   expiresAt: Date,
   isDeleted: { type: Boolean, default: false },
-  profileImage: { type: String }
+  profileImage: { type: String },
+  wishlist: {
+    type: [String],
+    default: null
+  },
 });
 
 

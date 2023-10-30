@@ -38,7 +38,8 @@ const userRegister = async (req, res) => {
                         otp: null,
                         createdAt: null,
                         expiresAt: null,
-                        profileImage: null
+                        profileImage: null,
+                        wishlist: null
                     });
 
                     try {
@@ -360,18 +361,38 @@ const addUserProfile = async (req, res) => {
 const addToWishlist = async (req, res) => {
     try {
         const { id } = req.params;
-        if (!id) {
-            return res.status(400).json({ message: "Enter ID !!!" })
+        const { email } = req.body;
+
+        if (!id || !email) {
+            return res.status(400).json({ message: "Please provide both ID and Email" });
         }
-        const addToWishlist = await Product.findOne({ _id: id });
-        if (!addToWishlist) {
-            return res.status(400).json({ message: "Product Not Exist" });
+
+        const findUser = await userModel.findOne({ email });
+
+        if (!findUser) {
+            return res.status(400).json({ message: "User with this email is not registered" });
         }
-        res.status(200).json({ message: "Product Added to wishlist", addToWishlist })
+
+        const findProduct = await Product.findOne({ _id: id });
+
+        if (!findProduct) {
+            return res.status(400).json({ message: "Product not found" });
+        }
+
+        if (findUser.wishlist.includes(id)) {
+            return res.status(400).json({ message: "Product is already in the wishlist" });
+        }
+
+        findUser.wishlist.push(id);
+        await findUser.save();
+
+        res.status(200).json({ message: "Product added to wishlist", product: findProduct });
     } catch (error) {
-        res.status(400).json({ message: "Error adding to wishlist" })
+        console.error(error.message);
+        res.status(500).json({ message: "Error adding to wishlist" });
     }
-}
+};
+
 
 module.exports = {
     userRegister,
