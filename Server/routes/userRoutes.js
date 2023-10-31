@@ -25,7 +25,8 @@ const {
     newArrivals,
     addToCart,
     deleteCartItem,
-    updateCartItem
+    updateCartItem,
+    validateCoupon
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -48,9 +49,9 @@ route.get('/getAllWishlist/:id', getAllWishlist)
 route.post('/addAddress/:id', addAddress)
 route.get('/getUserAddresses/:id', readAddresses)
 route.post('/updateUserAddresses/:id', updateUserAddresses)
-route.get('/newArrivals',newArrivals)
-route.post('/addToCart/:id',addToCart)
-route.post('/deleteCartItem/:id',deleteCartItem)
-route.post('/updateCartItem/:id',updateCartItem)
-
+route.get('/newArrivals', newArrivals)
+route.post('/addToCart/:id', addToCart)
+route.post('/deleteCartItem/:id', deleteCartItem)
+route.post('/updateCartItem/:id', updateCartItem)
+route.post('/validateCoupon/:id', validateCoupon)
 module.exports = route;

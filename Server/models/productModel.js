@@ -35,7 +35,11 @@ const productSchema = new Schema({
     date: { type: Date, default: Date.now },
     parentId: { type: String, required: true }, // Parent Required
     animal: { type: String, required: true },
-    coupon: { type: String } // Optional
+    coupon: {
+        code: { type: String },
+        discountPercentage: { type: Number },
+        expirationDate: { type: Date },
+    },
 });
 
 

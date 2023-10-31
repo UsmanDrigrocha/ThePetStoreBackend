@@ -656,6 +656,39 @@ const addToCart = async (req, res) => {
     }
 };
 
+const validateCoupon = async (req, res) => {
+    try {
+        const enteredCouponCode = req.body.code;
+        if (!enteredCouponCode) {
+            return res.status(400).json({ message: "Enter Coupon Code" });
+        }
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" })
+        }
+        const findProduct = await Product.findOne({ _id: id });
+        if (!findProduct) {
+            return res.status(400).json({ message: "Product Not found" })
+        }
+        const productCouponCode = findProduct.coupon.code;
+        const couponExpirationDate = findProduct.coupon.expirationDate;
+        const todayDate = new Date();
+        const productPrice = findProduct.price;
+        const discountPercentage = findProduct.coupon.discountPercentage;
+        if (enteredCouponCode === productCouponCode && todayDate < couponExpirationDate) {
+            var discount = (productPrice * discountPercentage) / 100;
+            var discountedPrice = productPrice - discount;
+            return res.json({ message: "Coupon Verified", priceAfterDiscount: discountedPrice, oldPrice: productPrice })
+        }
+        res.status(400).json({ message: "Invalid / Expired Coupon" })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error validating product coupon" });
+    }
+}
+
+
+
 
 module.exports = {
     userRegister,
@@ -678,5 +711,6 @@ module.exports = {
     addToCart,
     deleteCartItem,
     updateCartItem,
+    validateCoupon,
 };
 
