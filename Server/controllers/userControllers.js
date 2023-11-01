@@ -646,7 +646,7 @@ const deleteCartItem = async (req, res) => {
 };
 
 
-// If Cart (Add to Cart) Else : Update Cart //  ✅
+// If Cart (Add to Cart) Else : Update Cart ✅
 const addToCart = async (req, res) => {
     try {
         const { id } = req.params;
@@ -706,6 +706,7 @@ const addToCart = async (req, res) => {
     }
 };
 
+// Show User Cart  ✅
 const showUserCart = async (req, res) => {
     try {
         const { id } = req.params;
