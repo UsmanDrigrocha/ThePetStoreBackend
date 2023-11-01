@@ -25,7 +25,8 @@ const {
     addToCart,
     deleteCartItem,
     validateCoupon,
-    updateUserProfile
+    updateUserProfile,
+    showUserCart
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -56,4 +57,7 @@ route.post('/addToCart/:id', addToCart)
 route.post('/deleteCartItem/:id', deleteCartItem)
 route.post('/updateCartItem/:id', addToCart)
 route.post('/validateCoupon/:id', validateCoupon)
+route.get('/getUserCart/:id',showUserCart)
+
+
 module.exports = route;

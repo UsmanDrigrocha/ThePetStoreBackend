@@ -495,7 +495,7 @@ const getUserWishlist = async (req, res) => {
         if (!findUser) {
             return res.status(400).json({ message: "ID not registered" });
         }
-        const wishlist = await WishlistModel.findOne({ userID: findUser._id }) .populate('wishlist.productID');
+        const wishlist = await WishlistModel.findOne({ userID: findUser._id }).populate('wishlist.productID');
         if (!wishlist || !Array.isArray(wishlist.wishlist) || wishlist.wishlist.length === 0) {
             return res.status(400).json({ message: "Your Wishlist is Empty" });
         }
@@ -706,6 +706,27 @@ const addToCart = async (req, res) => {
     }
 };
 
+const showUserCart = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" })
+        }
+        const user = await userModel.findOne({ _id: id });
+        if (!user) {
+            return res.status(400).json({ message: "User Not Registered" });
+        }
+        const userCart = await CartModel.findOne({ userID: user._id }).populate('cart.productID');
+        if (!userCart) {
+            return res.status(400).json({ message: "User Don't Have Cart" })
+        }
+        const data = userCart.cart;
+        res.status(200).json({ message: "Getting User Cart", data });
+    } catch (error) {
+        res.status(400).json({ message: "Error Getting User Cart", Error: error.message });
+    }
+}
+
 // ✅
 const validateCoupon = async (req, res) => {
     try {
@@ -759,6 +780,7 @@ module.exports = {
     addToCart,
     deleteCartItem,
     validateCoupon,
-    updateUserProfile
+    updateUserProfile,
+    showUserCart,
 };
 
