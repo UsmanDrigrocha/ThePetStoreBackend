@@ -495,14 +495,14 @@ const getUserWishlist = async (req, res) => {
         if (!findUser) {
             return res.status(400).json({ message: "ID not registered" });
         }
-        const wishlist = await WishlistModel.findOne({ userID: findUser._id });
+        const wishlist = await WishlistModel.findOne({ userID: findUser._id }) .populate('wishlist.productID');
         if (!wishlist || !Array.isArray(wishlist.wishlist) || wishlist.wishlist.length === 0) {
             return res.status(400).json({ message: "Your Wishlist is Empty" });
         }
         res.status(200).json({ message: "Wishlist", wishlist: wishlist });
     }
     catch (error) {
-        res.status(400).json({ message: "Error Getting Wishlist" })
+        res.status(400).json({ message: "Error Getting Wishlist", Error: error.message })
     }
 }
 
