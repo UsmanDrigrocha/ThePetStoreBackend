@@ -2,7 +2,7 @@ const path = require('path')
 const express = require('express');
 const route = express.Router();
 const { validateToken } = require('../middlewares/validateToken');
-const { bannerModel } = require('../models/bannerModel')
+const { bannerModel } = require('../models/Admin/bannerModel')
 const dotenv = require('dotenv').config();
 const {
     showBannerImg,
@@ -19,7 +19,8 @@ const {
     getProductsByCategories,
     getOneProduct,
     UpdateProduct,
-    deleteProduct
+    deleteProduct,
+    createSale
 } = require('../controllers/adminController');
 
 
@@ -36,6 +37,7 @@ route.post('/createProduct', createProduct)
 route.get('/getAllProducts', getAllProducts)
 route.get('/getProductsByCategories/:id', getProductsByCategories)
 route.get('/getOneProduct/:id', getOneProduct)
-route.put('/updateProduct/:id',UpdateProduct)
-route.delete('/deleteProduct/:id',deleteProduct)
+route.put('/updateProduct/:id', UpdateProduct)
+route.delete('/deleteProduct/:id', deleteProduct)
+route.post('/createSale/:id', createSale)
 module.exports = route;

@@ -14,7 +14,7 @@ const categorySchema = new Schema({
     name: { type: String },
     date: { type: Date, default: Date.now },
     image: String,
-    parentId: { type: String, required: true }
+    parentId: { type: String }
 });
 
 
@@ -38,6 +38,11 @@ const productSchema = new Schema({
     coupon: {
         code: { type: String },
         discountPercentage: { type: Number },
+        expirationDate: { type: Date },
+    },
+    discountPercentage: {
+        discountPercentage: { type: Number },
+        discountedPrice: { type: Number },
         expirationDate: { type: Date },
     },
 });

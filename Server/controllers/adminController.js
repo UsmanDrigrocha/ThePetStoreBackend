@@ -2,17 +2,17 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const storage = multer.memoryStorage(); // Store image data in memory
 const upload = multer({ storage: storage });
-const bannerModel = require('../models/bannerModel');
+const bannerModel = require('../models/Admin/bannerModel');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const path = require('path')
-const userModel = require('../models/userModel');
+const userModel = require('../models/User/userModel');
 const {
   Category,
   Product,
-} = require('../models/productModel');
+} = require('../models/Admin/productModel');
 
-
+//  ✅
 const showRegistedUsers = async (req, res) => {
   try {
     try {
@@ -28,6 +28,7 @@ const showRegistedUsers = async (req, res) => {
   }
 };
 
+//  ✅
 const showBannerImg = async (req, res) => {
   try {
     const data = await bannerModel.find({});
@@ -45,6 +46,7 @@ const showBannerImg = async (req, res) => {
   }
 };
 
+//  ✅
 const createCategory = async (req, res) => {
   try {
 
@@ -82,6 +84,7 @@ const createCategory = async (req, res) => {
   }
 };
 
+//  ✅
 const readOneCategory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,6 +104,7 @@ const readOneCategory = async (req, res) => {
   }
 };
 
+//  ✅
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -136,7 +140,7 @@ const updateCategory = async (req, res) => {
   }
 };
 
-
+//  ✅
 const getProductCategories = async (req, res) => {
   try {
     const data = await Category.find({});
@@ -147,6 +151,7 @@ const getProductCategories = async (req, res) => {
   }
 };
 
+//  ✅
 const imageController = async (req, res, next) => {
   try {
     const { fileURL } = req.body;
@@ -161,6 +166,7 @@ const imageController = async (req, res, next) => {
   }
 };
 
+//  ✅
 const getChildCategories = async (req, res) => {
   try {
     const { id } = req.params;
@@ -173,7 +179,7 @@ const getChildCategories = async (req, res) => {
     res.status(400).json({ message: "Error Getting Child Categories" })
   }
 }
-
+//  ✅
 const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -191,6 +197,7 @@ const deleteCategory = async (req, res) => {
   }
 };
 
+//  ✅
 const createProduct = async (req, res) => {
   try {
     const { name, price, description, size, quantity, animal, parentId, coupon, images } = req.body;
@@ -224,6 +231,7 @@ const createProduct = async (req, res) => {
   }
 }
 
+//  ✅
 const getAllProducts = async (req, res) => {
   try {
     const data = await Product.find({})
@@ -233,6 +241,7 @@ const getAllProducts = async (req, res) => {
   }
 }
 
+//  ✅
 const getProductsByCategories = async (req, res) => {
   try {
     const { id } = req.params;
@@ -246,6 +255,7 @@ const getProductsByCategories = async (req, res) => {
   }
 }
 
+//  ✅
 const getOneProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -260,6 +270,7 @@ const getOneProduct = async (req, res) => {
   }
 }
 
+//  ✅
 const UpdateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -290,7 +301,7 @@ const UpdateProduct = async (req, res) => {
       findProduct.parentId = parentId;
     }
     if (coupon) {
-      findProduct.coupon;
+      findProduct.coupon = coupon;
     }
     if (images) {
       findProduct.images = images;
@@ -302,6 +313,7 @@ const UpdateProduct = async (req, res) => {
   }
 }
 
+//  ✅
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -312,6 +324,34 @@ const deleteProduct = async (req, res) => {
     res.status(200).json({ message: "Deleted Product", findProduct })
   } catch (error) {
     res.status(400).json({ message: "Error Deleting Product" })
+  }
+}
+
+//  ✅
+const createSale = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID" });
+    }
+    const findProduct = await Product.findOne({ _id: id });
+    if (!findProduct) {
+      return res.status(400).json({ message: "Product Not Found !!!" });
+    }
+    const { discountPercentage , expirationDate} = req.body;
+    if (!discountPercentage) {
+      return res.status(400).json({ message: "Enter Discount Percentage !!" });
+    }
+    var discount = (findProduct.price * discountPercentage) / 100;
+    var discountedPrice = findProduct.price - discount;
+    findProduct.discountPercentage.discountPercentage = discountPercentage;
+    findProduct.discountPercentage.discountedPrice = discountedPrice;
+
+    console.log(discountedPrice)
+    res.status(200).json({ message: "Creating Sale !!" });
+  } catch (error) {
+    console.log(error.message)
+    res.status(400).json({ message: "Error Creating Sale" });
   }
 }
 
@@ -330,5 +370,7 @@ module.exports = {
   getProductsByCategories,
   getOneProduct,
   UpdateProduct,
-  deleteProduct
+  deleteProduct,
+  createSale,
+
 };

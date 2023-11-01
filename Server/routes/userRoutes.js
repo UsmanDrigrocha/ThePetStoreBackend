@@ -18,15 +18,16 @@ const {
     uploadImage,
     addToWishlist,
     deleteWishlist,
-    getAllWishlist,
+    getUserWishlist,
     addAddress,
     readAddresses,
     updateUserAddresses,
     newArrivals,
     addToCart,
     deleteCartItem,
-    updateCartItem,
-    validateCoupon
+    // updateCartItem,
+    validateCoupon,
+    updateUserProfile
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -40,18 +41,21 @@ route.post('/verify-otp', verifyOTP)
 route.post('/change-password', userChangePassword); // Change Old Password ✅
 route.post('/reset-password', userResetPassword); // Send link to Email
 route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
-route.post('/updateProfile', addUserProfile) // Update User Profile Image
+route.post('/createProfile/:id', addUserProfile) // Create User Profile Image
+route.post('/updateProfile/:id', updateUserProfile) // Update User Profile Image
+
+
 route.get('/getAllCategories', getProductCategories)
 route.post('/uploadImage', uploadImage)
 route.post('/addToWishlist/:id', addToWishlist)
 route.post('/removeFromWishlist/:id', deleteWishlist)
-route.get('/getAllWishlist/:id', getAllWishlist)
+route.get('/getUserWishlist/:id', getUserWishlist)
 route.post('/addAddress/:id', addAddress)
 route.get('/getUserAddresses/:id', readAddresses)
 route.post('/updateUserAddresses/:id', updateUserAddresses)
 route.get('/newArrivals', newArrivals)
 route.post('/addToCart/:id', addToCart)
 route.post('/deleteCartItem/:id', deleteCartItem)
-route.post('/updateCartItem/:id', updateCartItem)
+route.post('/updateCartItem/:id', addToCart)
 route.post('/validateCoupon/:id', validateCoupon)
 module.exports = route;

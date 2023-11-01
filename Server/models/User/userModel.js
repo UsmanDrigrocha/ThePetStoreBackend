@@ -19,25 +19,25 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   expiresAt: Date,
   isDeleted: { type: Boolean, default: false },
-  profileImage: { type: String },
-  wishlist: {
-    type: [String],
-    default: null
-  },
-  addresses: {
-    type: [String],
-    default: null
-  },
-      cart: [{
-        productID: {
-            type: mongoose.Schema.Types.ObjectID,
-            ref: 'Product',
-        },
-        quantity: {
-            type: Number,
-            default: 1,
-        }
-    }]
+  // profileImage: { type: String },
+  // wishlist: {
+  //   type: [String],
+  //   default: null
+  // },
+  // addresses: {
+  //   type: [String],
+  //   default: null
+  // },
+    //   cart: [{
+    //     productID: {
+    //         type: mongoose.Schema.Types.ObjectID,
+    //         ref: 'Product',
+    //     },
+    //     quantity: {
+    //         type: Number,
+    //         default: 1,
+    //     }
+    // }]
 });
 
 

@@ -1,17 +1,20 @@
-const userModel = require('../models/userModel');
+const userModel = require('../models/User/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 require('dotenv').config();
 const mail = require('../utils/sendMail');
 const session = require('express-session');
-const bannerModel = require('../models/bannerModel');
+const bannerModel = require('../models/Admin/bannerModel');
 const multer = require('multer');
 const path = require('path');
-const { Product } = require('../models/productModel');
+const { Product } = require('../models/Admin/productModel');
+const userProfile = require('../models/User/userProfileModel');
+const userProfileModel = require('../models/User/userProfileModel');
+const CartModel = require('../models/User/cartModel');
+const WishlistModel = require('../models/User/WishlistModel')
 
-
-//Register Account
+//Register Account ✅
 const userRegister = async (req, res) => {
     try {
         const { name, email, password } = req.body;  // Taking name , email , password from body
@@ -38,10 +41,6 @@ const userRegister = async (req, res) => {
                         otp: null,
                         createdAt: null,
                         expiresAt: null,
-                        profileImage: null,
-                        wishlist: null,
-                        addresses: null,
-                        cart: null,
                     });
 
                     try {
@@ -65,7 +64,7 @@ const userRegister = async (req, res) => {
     }
 }
 
-//Login Account + Generate Token
+//Login Account + Generate Token ✅
 const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -95,7 +94,7 @@ const userLogin = async (req, res) => {
     }
 };
 
-//Forget Password : Change Password
+//Forget Password : Change Password ✅
 const userChangePassword = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -134,7 +133,7 @@ const userChangePassword = async (req, res) => {
 
 }
 
-// Create One time link & send to Mail
+// Create One time link & send to Mail ✅
 const userResetPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -166,7 +165,7 @@ const userResetPassword = async (req, res) => {
     }
 }
 
-// Verify Reset Link
+// Verify Reset Link ✅
 const verifyUserResetPassword = async (req, res) => {
     const { id, token } = req.params;
     try {
@@ -190,7 +189,7 @@ const verifyUserResetPassword = async (req, res) => {
 }
 
 
-//Show banner images 
+//Show banner images  ✅
 const showBannerImg = async (req, res) => {
     try {
         const data = await bannerModel.find({});
@@ -208,7 +207,7 @@ const showBannerImg = async (req, res) => {
     }
 };
 
-//Generate OTP ; valid for 1.5 Minutes
+//Generate OTP ; valid for 1.5 Minutes ✅
 const generateOTP = async (req, res) => {
     try {
         const { email } = req.body;
@@ -251,7 +250,7 @@ const generateOTP = async (req, res) => {
     }
 };
 
-// Verify OTP
+// Verify OTP ✅
 const verifyOTP = async (req, res) => {
     try {
         const { email, enteredOTP } = req.body;
@@ -324,42 +323,72 @@ const uploadImage = async (req, res) => {
     }
 }
 
-// Update User Profile
+// Create User Profile Image✅
 const addUserProfile = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, image, email } = req.body;
+        const { image, addresses } = req.body;
 
-        if (!email) {
-            return res.status(400).json({ message: "Enter Email" });
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" })
         }
 
-
-        const existingUser = await userModel.findOne({ email: email });
-
-        if (!existingUser) {
-            return res.status(404).json({ message: "User not Exist" });
+        const findUser = await userModel.findOne({ _id: id });
+        if (!findUser) {
+            return res.status(400).json({ message: "User Not Registered" })
         }
 
-        if (name) {
-            existingUser.name = name;
+        if (!image) {
+            return res.status(200).json({ message: "Enter All Fields" })
+        }
+
+        const findProfile = await userProfileModel.findOne({ userId: findUser._id })
+        if (findProfile) {
+            return res.status(400).json({ message: "Profile Already Exist" });
+        }
+
+        const userProfile = new userProfileModel({
+            profileImage: image,
+            addresses: null,
+            userId: findUser._id,
+        })
+        await userProfile.save();
+        res.status(200).json({ message: "User Profile updated", userProfile });
+    } catch (error) {
+        res.status(500).json({ message: "Error Creating user profile", error: error.message });
+    }
+}
+
+// Update User Profile Image ✅
+const updateUserProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { image } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" })
+        }
+
+        const findUser = await userModel.findOne({ _id: id });
+        if (!findUser) {
+            return res.status(400).json({ message: "User Not Registered" })
+        }
+
+        const findProfile = await userProfileModel.findOne({ userId: findUser._id });
+        if (!findProfile) {
+            return res.status(400).json({ message: "Profile Not Exist" });
         }
         if (image) {
-            existingUser.profileImage = image;
+            findProfile.profileImage = image;
         }
-        if (email) {
-            existingUser.email = email;
-        }
-
-        const updatedUser = await existingUser.save();
-
-        res.status(200).json({ message: "User Profile updated", data: updatedUser });
+        await findProfile.save();
+        res.status(200).json({ message: "User Profile updated", findProfile });
     } catch (error) {
         res.status(500).json({ message: "Error updating user profile", error: error.message });
     }
 }
 
-// Add to wishlist
+// Add to wishlist ✅
 const addToWishlist = async (req, res) => {
     try {
         const { id } = req.params;
@@ -381,25 +410,37 @@ const addToWishlist = async (req, res) => {
             return res.status(400).json({ message: "Product not found" });
         }
 
-        if (!findUser.wishlist) {
-            findUser.wishlist = [];
+        const wishlist = await WishlistModel.findOne({ userID: findUser._id })
+        if (!wishlist) {
+            const newWishlist = new WishlistModel({
+                wishlist: [{
+                    productID: id,
+                }],
+                userID: findUser._id
+            });
+            await newWishlist.save();
+            return res.status(201).json({ message: "Product Added To Wishlist", Product: newWishlist });
+        } else {
+            const userWishlist = await WishlistModel.findOne({ userID: findUser._id });
+            const wishlistItem = userWishlist.wishlist.find(item => item.productID == id);
+            if (!wishlistItem) {
+                userWishlist.wishlist.push({
+                    productID: id,
+                });
+                await userWishlist.save();
+                return res.status(200).json({ message: 'Product Added to Wishlist', Wishlist: userWishlist });
+            }
+            else {
+                res.status(400).json({ message: "Product Already Exist in Wishlist" })
+            }
         }
-
-        if (findUser.wishlist.includes(id)) {
-            return res.status(400).json({ message: "Product is already in the wishlist" });
-        }
-
-        findUser.wishlist.push(id);
-        await findUser.save();
-
-        res.status(200).json({ message: "Product added to wishlist", product: findProduct });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: "Error adding to wishlist" });
     }
 };
 
-// Delete Item from wishlist
+// Delete Item from wishlist ✅
 const deleteWishlist = async (req, res) => {
     try {
         const { id } = req.params;
@@ -421,44 +462,51 @@ const deleteWishlist = async (req, res) => {
             return res.status(400).json({ message: "Product not found" });
         }
 
-        if (!findUser.wishlist) {
-            findUser.wishlist = [];
+
+        const userWishlist = await WishlistModel.findOne({ userID: findUser._id });
+        const wishlistItem = userWishlist.wishlist.find(item => item.productID == id);
+        if (!wishlistItem) {
+            res.status(400).json({ message: "Product Not Exist in Wishlist" })
+        }
+        else {
+            userWishlist.wishlist.pop({
+                productID: id,
+            });
+            await userWishlist.save();
+            return res.status(200).json({ message: 'Product Removed from Wishlist', Wishlist: userWishlist });
         }
 
-        if (findUser.wishlist.includes(id)) {
-            findUser.wishlist = null;
-            await findUser.save();
-            res.status(200).json({ message: "Product Deleted from wishlist", product: findProduct });
-        } else {
-            return res.status(400).json({ message: "Product not exist in wishlist" })
-        }
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: "Error deleting from wishlist" });
+        res.status(500).json({ message: "Error adding to wishlist" });
     }
+
+
 };
 
-// Get all items from wishlist
-const getAllWishlist = async (req, res) => {
+// Get all items from wishlist ✅
+const getUserWishlist = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
             return res.status(400).json({ message: "Enter id" })
         }
-
         const findUser = await userModel.findOne({ _id: id });
         if (!findUser) {
-            return res.status(400).json({ message: "id not registered" });
+            return res.status(400).json({ message: "ID not registered" });
         }
-        const wishlist = findUser.wishlist;
-        res.status(200).json({ message: "Wishlist", wishlist: wishlist })
+        const wishlist = await WishlistModel.findOne({ userID: findUser._id });
+        if (!wishlist || !Array.isArray(wishlist.wishlist) || wishlist.wishlist.length === 0) {
+            return res.status(400).json({ message: "Your Wishlist is Empty" });
+        }
+        res.status(200).json({ message: "Wishlist", wishlist: wishlist });
     }
     catch (error) {
         res.status(400).json({ message: "Error Getting Wishlist" })
     }
 }
 
-// Add User Addresses
+// Add User Addresses ✅
 const addAddress = async (req, res) => {
     try {
         const { id } = req.params;
@@ -466,23 +514,27 @@ const addAddress = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Enter ID" })
         }
-        if (!addresses) {
-            return res.status(400).json({ message: "Enter Address" })
-        }
         const findUser = await userModel.findOne({ _id: id });
         if (!findUser) {
             return res.status(400).json({ message: "User Not Exist" })
         }
+        if (!addresses) {
+            return res.status(400).json({ message: "Enter Address" })
+        }
 
-        findUser.addresses = addresses;
-        await findUser.save();
-        res.status(200).json({ message: "Address Added", Address: addresses })
+        const findProfile = await userProfileModel.findOne({ userId: findUser._id });
+
+        findProfile.addresses = addresses;
+
+        await findProfile.save();
+        res.status(200).json({ message: "Address Added", Addresses: findProfile.addresses })
     } catch (error) {
         res.status(400).json({ message: "Error Adding Addresses" })
     }
 }
 
-// Get All User Addresses
+
+// Get  User Addresse //  ✅
 const readAddresses = async (req, res) => {
     try {
         const { id } = req.params;
@@ -494,6 +546,11 @@ const readAddresses = async (req, res) => {
             return res.status(400).json({ message: "User Doesn't Exist" })
         }
 
+        const findAddresses = await userProfileModel.findOne({ userId: _id });
+        if (!findAddresses) {
+            return res.status(400).json({ message: "User " })
+        }
+
         const data = findUser.addresses;
         res.status(200).json({ Addresses: data })
     } catch (error) {
@@ -501,7 +558,7 @@ const readAddresses = async (req, res) => {
     }
 }
 
-// Update User Addresses
+// Update User Addresse  :id ✅
 const updateUserAddresses = async (req, res) => {
     try {
         const { id } = req.params;
@@ -519,18 +576,22 @@ const updateUserAddresses = async (req, res) => {
         if (!findUser) {
             return res.status(400).json({ message: "User Not Registered" });
         }
-
-        const data = await userModel.findOne({ _id: id });
-
-
-        res.status(400).json({ message: "User Addresses Updated", Addresses: data.addresses })
-
+        const findProfile = await userProfileModel.findOne({ userId: id })
+        if (!findProfile) {
+            const newProfile = new userProfile({
+                addresses: addresses
+            });
+        } else {
+            findProfile.addresses = addresses;
+            findProfile.save();
+            res.status(400).json({ message: "User Addresses Updated", findProfile })
+        }
     } catch (error) {
         res.status(400).json({ message: "Error Updating Addresses" })
     }
 }
 
-// Get New Arrivals : New Products (Less than 30 Days)
+// Get New Arrivals : New Products (Less than 30 Days) //  ✅
 const newArrivals = async (req, res) => {
     try {
         const daysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
@@ -542,88 +603,59 @@ const newArrivals = async (req, res) => {
     }
 };
 
-// Update User Cart :item
-const updateCartItem = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { email, quantity } = req.body;
-        if (quantity <= 0) {
-            return res.status(400).json({ error: 'Invalid quantity' });
-        }
-        const user = await userModel.findOne({ email });
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        if (!user.cart) {
-            user.cart = [];
-        }
-
-        const product = await Product.findById(id);
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-
-
-        const cartItem = user.cart.find((item) => item.productID.toString() === id);
-
-        if (cartItem) {
-            cartItem.quantity += quantity;
-        } else {
-            user.cart.push({ productID: product._id, quantity });
-        }
-        if (user.cart[0] > product.quantity) {
-            return res.status(400).json({ error: 'This Quantity is not available in stock' });
-        }
-
-        await user.save();
-
-        return res.status(200).json({ message: 'Product added to cart', Cart: user.cart });
-    } catch (err) {
-        console.log(err.message)
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-};
-
-// Delete item from cart
+// Delete item from cart//  ✅
 const deleteCartItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { email } = req.body
-        if (!id || !email) {
-            return res.status(400).json({ message: "Enter All Fields" })
+        const { quantity, email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: "Enter All Fields" });
         }
+
+
         const user = await userModel.findOne({ email });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const cartItemIndex = user.cart.findIndex((item) => item.productID.toString() === id);
+        const findProduct = await Product.findOne({ _id: id });
 
-        if (cartItemIndex === -1) {
-            return res.status(404).json({ error: 'Item not found in cart' });
+        if (!findProduct) {
+            return res.status(400).json({ message: "Product Not Found" });
         }
+        const userCart = await CartModel.findOne({ userID: user._id });
+        if (!userCart) {
+            return res.status(400).json({ message: "Create Your Cart !" })
+        }
+        else {
+            const cartItemIndex = userCart.cart.findIndex(item => item.productID == id);
 
-        user.cart.splice(cartItemIndex, 1);
-        await user.save();
-
-        return res.status(200).json({ message: 'Cart item deleted', Cart: user.cart });
+            if (cartItemIndex !== -1) {
+                userCart.cart.splice(cartItemIndex, 1);
+                await userCart.save();
+                return res.json({ message: "Product removed from the cart" });
+            } else {
+                res.status(400).json({ message: "Cart is Empty" })
+            }
+        }
     } catch (err) {
-        console.log(err.message);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Error in Deleting Cart' });
     }
 };
 
-// Add item to cart
+
+// If Cart (Add to Cart) Else : Update Cart //  ✅
 const addToCart = async (req, res) => {
     try {
         const { id } = req.params;
         const { quantity, email } = req.body;
+
         if (!email || !quantity) {
-            return res.status(400).json({ message: "Enter All Fields" })
+            return res.status(400).json({ message: "Enter All Fields" });
         }
+
         if (quantity <= 0) {
             return res.status(400).json({ error: 'Invalid quantity' });
         }
@@ -634,28 +666,47 @@ const addToCart = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const cartItem = user.cart.find((item) => item.productID.toString() === id);
+        const findProduct = await Product.findOne({ _id: id });
 
-        if (!cartItem) {
-            return res.status(404).json({ error: 'Item not found in cart' });
+        if (!findProduct) {
+            return res.status(400).json({ message: "Product Not Found" });
         }
+        const userCart = await CartModel.findOne({ userID: user._id });
 
-        const product = await Product.findById(cartItem.productID);
-
-        if (product.quantity < quantity) {
-            return res.status(400).json({ error: 'This Quantity is not available in stock' });
+        if (!userCart) {
+            const newCart = new CartModel({
+                cart: [{
+                    productID: id,
+                    quantity,
+                }],
+                userID: user._id
+            });
+            await newCart.save();
+            return res.status(200).json({ message: 'Product added to cart', cart: newCart });
+        } else {
+            if (quantity > findProduct.quantity) {
+                return res.status(400).json({ message: "This Quantity is not available in Stock" });
+            }
+            const cartItem = userCart.cart.find(item => item.productID == id);
+            if (!cartItem) {
+                userCart.cart.push({
+                    productID: id,
+                    quantity,
+                });
+            }
+            else {
+                cartItem.quantity = quantity;
+            }
+            await userCart.save();
+            return res.status(200).json({ message: 'Cart item quantity updated', cart: userCart });
         }
-
-        cartItem.quantity = quantity;
-        await user.save();
-
-        return res.status(200).json({ message: 'Cart item quantity updated', Cart: user.cart });
     } catch (err) {
-        console.log(err.message);
-        return res.status(500).json({ error: 'Internal server error' });
+
+        return res.status(500).json({ error: 'Error in Cart' });
     }
 };
 
+// ✅
 const validateCoupon = async (req, res) => {
     try {
         const enteredCouponCode = req.body.code;
@@ -687,9 +738,6 @@ const validateCoupon = async (req, res) => {
     }
 }
 
-
-
-
 module.exports = {
     userRegister,
     userLogin,
@@ -703,14 +751,14 @@ module.exports = {
     addUserProfile,
     addToWishlist,
     deleteWishlist,
-    getAllWishlist,
+    getUserWishlist,
     addAddress,
     readAddresses,
     updateUserAddresses,
     newArrivals,
     addToCart,
     deleteCartItem,
-    updateCartItem,
     validateCoupon,
+    updateUserProfile
 };
 
