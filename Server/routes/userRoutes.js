@@ -14,7 +14,6 @@ const {
     generateOTP,
     verifyOTP,
     addUserProfile,
-    // updateUserProfile,
     uploadImage,
     addToWishlist,
     deleteWishlist,
@@ -25,7 +24,6 @@ const {
     newArrivals,
     addToCart,
     deleteCartItem,
-    // updateCartItem,
     validateCoupon,
     updateUserProfile
 } = require('../controllers/userControllers');
