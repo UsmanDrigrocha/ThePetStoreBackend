@@ -1,16 +1,13 @@
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const storage = multer.memoryStorage(); // Store image data in memory
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const bannerModel = require('../models/Admin/bannerModel');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const path = require('path')
 const userModel = require('../models/User/userModel');
-const {
-  Category,
-  Product,
-} = require('../models/Admin/productModel');
+const { Category, Product } = require('../models/Admin/productModel');
 const Offer = require('../models/Admin/offers')
 
 //  ✅
