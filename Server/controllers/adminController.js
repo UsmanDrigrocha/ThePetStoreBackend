@@ -11,6 +11,7 @@ const {
   Category,
   Product,
 } = require('../models/Admin/productModel');
+const Offer = require('../models/Admin/offers')
 
 //  ✅
 const showRegistedUsers = async (req, res) => {
@@ -234,12 +235,24 @@ const createProduct = async (req, res) => {
 //  ✅
 const getAllProducts = async (req, res) => {
   try {
-    const data = await Product.find({})
-    res.status(200).json({ message: "Products Found", Products: data })
+    const products = await Product.find({});
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    for (const product of products) {
+      const productId = product._id;
+      await updateProductOfferPrice(productId);
+    }
+
+    res.status(200).json({ message: "All Products", Products: products });
   } catch (error) {
-    res.status(400).json({ message: "Error Getting All Products" })
+    console.error("Error updating product offerPrices:", error);
+    res.status(400).json({ message: "Error Getting products" });
   }
 }
+
 
 //  ✅
 const getProductsByCategories = async (req, res) => {
@@ -248,6 +261,10 @@ const getProductsByCategories = async (req, res) => {
     const findProducts = await Product.find({ parentId: id });
     if (!findProducts) {
       return res.status(200).json({ message: "Invalid ID / Not Exist" })
+    }
+    for (const product of findProducts) {
+      const productId = findProducts._id;
+      await updateProductOfferPrice(productId);
     }
     res.status(200).json({ message: "Getting Products by Categories", products: findProducts });
   } catch (error) {
@@ -263,6 +280,7 @@ const getOneProduct = async (req, res) => {
     if (!findProduct) {
       return res.status(400).json({ message: "Product Not Found" })
     }
+    updateProductOfferPrice(id)
     res.status(200).json({ message: "Product Found", findProduct })
   } catch (error) {
     res.status(400).json({ message: "Error Getting Product" })
@@ -306,6 +324,7 @@ const UpdateProduct = async (req, res) => {
     if (images) {
       findProduct.images = images;
     }
+    await updateProductOfferPrice(id);
     await findProduct.save();
     res.status(200).json({ message: "Product Updated", findProduct })
   } catch (error) {
@@ -328,30 +347,152 @@ const deleteProduct = async (req, res) => {
 }
 
 //  ✅
-const createSale = async (req, res) => {
+const createOffer = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ message: "Enter ID" });
+      return res.status(400).json({ message: "Enter Product ID" });
+    }
+    const { discountPercentage, expirationDate } = req.body;
+    if (!discountPercentage || !expirationDate) {
+      return res.status(400).json({ message: "Enter All Fields" });
+    }
+    if (discountPercentage <= 0) {
+      return res.status(400).json({ message: "Minimum Discount should be greater than 0" });
     }
     const findProduct = await Product.findOne({ _id: id });
     if (!findProduct) {
-      return res.status(400).json({ message: "Product Not Found !!!" });
+      return res.status(400).json({ message: "Product Not Found" });
     }
-    const { discountPercentage , expirationDate} = req.body;
-    if (!discountPercentage) {
-      return res.status(400).json({ message: "Enter Discount Percentage !!" });
+
+    var discount = (findProduct.price * discountPercentage) / 100;
+    var discountedPrice = findProduct.price - discount;
+
+    const findOffer = await Offer.findOne({ productID: id });
+    if (findOffer) {
+      return res.status(400).json({ message: "Offer Already Exists!" });
+    }
+
+    const newOffer = new Offer({
+      productID: id,
+      expirationDate,
+      discountPercentage,
+      discountedPrice
+    });
+
+    findProduct.offerPrice = discountedPrice;
+    await findProduct.save();
+    await newOffer.save();
+
+    const populatedOffer = await Offer.findById(newOffer._id).populate('productID');
+    res.status(200).json({ message: "Offer Created", Offer: populatedOffer });
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).json({ message: "Error Creating Offer" });
+  }
+}
+
+//  ✅
+const readOffers = async (req, res) => {
+  try {
+    const populatedOffers = await Offer.find({}).populate('productID');
+
+    for (const offer of populatedOffers) {
+      const productId = offer.productID.id;
+      console.log(productId)
+      await updateProductOfferPrice(productId);
+    }
+
+    res.status(200).json({
+      message: "Offers fetched successfully",
+      Offer: populatedOffers,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(400).json({ message: "Error reading offers" });
+  }
+};
+
+
+//  ✅
+const updateOffer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID !" });
+    }
+    const findOffer = await Offer.findOne({ _id: id });
+
+    if (!findOffer) {
+      return res.status(404).json({ message: "Offer not found" });
+    }
+
+    const { discountPercentage, expirationDate } = req.body;
+    if (discountPercentage) {
+      findOffer.discountPercentage = discountPercentage;
+    }
+    if (expirationDate) {
+      findOffer.expirationDate = expirationDate;
+    }
+
+    const findProduct = await Product.findOne({ _id: findOffer.productID });
+    if (!findProduct) {
+      return res.send('Product Not Exist ;')
     }
     var discount = (findProduct.price * discountPercentage) / 100;
     var discountedPrice = findProduct.price - discount;
-    findProduct.discountPercentage.discountPercentage = discountPercentage;
-    findProduct.discountPercentage.discountedPrice = discountedPrice;
+    findOffer.discountedPrice = discountedPrice
+    await findOffer.save();
 
-    console.log(discountedPrice)
-    res.status(200).json({ message: "Creating Sale !!" });
+    return res.status(200).json({ message: "Offer Updated Successfully", UpdatedOffer: findOffer });
   } catch (error) {
-    console.log(error.message)
-    res.status(400).json({ message: "Error Creating Sale" });
+    console.log(error.message);
+    res.status(400).json({ message: "Error Updating Offer" });
+  }
+}
+
+//  ✅
+const deleteOffer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID !" });
+    }
+    const findProduct = await Product.findOne({ _id: id });
+    if (!findProduct) {
+      return res.status(400).json({ message: "Product Not Found" })
+    }
+    const findOffer = await Offer.findOneAndDelete({ productID: id });
+    if (!findOffer) {
+      return res.status(400).json({ message: "No Offer Exist" });
+    }
+    res.status(200).json({ message: "Offer / Sale Deleted Successfully !" })
+  } catch (error) {
+    res.status(400).json({ message: "Error Updating Offer" })
+  }
+}
+
+// Function That Check If product's sale is expired   ✅
+async function updateProductOfferPrice(productId) {
+  try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      console.log('Product not found');
+      return;
+    }
+    const offer = await Offer.findOne({ productID: productId });
+    if (offer && offer.expirationDate && offer.expirationDate > new Date()) {
+      const discount = (product.price * offer.discountPercentage) / 100;
+      product.offerPrice = product.price - discount;
+    } else {
+      console.log("Product's Price is Expired")
+      product.offerPrice = 0;
+    }
+
+    await product.save();
+    // console.log('Product offerPrice updated');
+  } catch (error) {
+    // console.error('Error updating product offerPrice:', error);
   }
 }
 
@@ -371,6 +512,8 @@ module.exports = {
   getOneProduct,
   UpdateProduct,
   deleteProduct,
-  createSale,
-
+  createOffer,
+  readOffers,
+  updateOffer,
+  deleteOffer
 };

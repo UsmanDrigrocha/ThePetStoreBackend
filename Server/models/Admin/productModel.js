@@ -45,6 +45,7 @@ const productSchema = new Schema({
         discountedPrice: { type: Number },
         expirationDate: { type: Date },
     },
+    offerPrice: { type: Number, default: 0 }
 });
 
 

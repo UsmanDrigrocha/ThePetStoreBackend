@@ -20,7 +20,11 @@ const {
     getOneProduct,
     UpdateProduct,
     deleteProduct,
-    createSale
+    createSale,
+    createOffer,
+    readOffers,
+    updateOffer,
+    deleteOffer
 } = require('../controllers/adminController');
 
 
@@ -39,5 +43,10 @@ route.get('/getProductsByCategories/:id', getProductsByCategories)
 route.get('/getOneProduct/:id', getOneProduct)
 route.put('/updateProduct/:id', UpdateProduct)
 route.delete('/deleteProduct/:id', deleteProduct)
-route.post('/createSale/:id', createSale)
+// route.post('/createSale/:id', createSale) // --------
+route.post('/createOffer/:id',createOffer)
+route.get('/getAllOffers',readOffers)
+route.post('/updateOffer/:id',updateOffer)
+route.delete('/deleteOffer/:id',deleteOffer)
+
 module.exports = route;
