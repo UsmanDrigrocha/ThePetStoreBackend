@@ -30,7 +30,7 @@ const showRegistedUsers = async (req, res) => {
   }
 };
 
-//Login Account + Generate Token
+//Login Account + Generate Token ✅
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -48,7 +48,6 @@ const adminLogin = async (req, res) => {
         const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
         bcrypt.compare(password, user.password, function (err, result) {
           //Comparing Password
-
           if (result) { //if password is correct
             req.session.adminToken = token;
             res.status(202).json({ message: "User Logged In successfully", adminToken: token });
@@ -530,13 +529,65 @@ async function updateProductOfferPrice(productId) {
   }
 }
 
-const createAdmin = async (req,res)=>{
+const createAdmin = async (req, res) => {
   try {
-    
+    const { id } = req.params;
+    const { name, email, password, role } = req.body;  // Taking name , email , password from body
+    const superAdmin = await userModel.findOne({ _id: id, isDeleted: false });
+    if (!superAdmin) {
+      return res.status(400).json({ message: "Not Registered !" })
+    }
+    if (!superAdmin.role === 'Super Admin') {
+      return res.status(400).json({ message: "Unauthorized" })
+    }
+    if (!name || !email || !password || !role || !id) {
+      res.status(400).json({ message: "Some field missing !!!" });
+    } else {
+      const saltRounds = 10;
+      bcrypt.genSalt(saltRounds, async function (err, salt) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Error generating salt' });
+        }
+        bcrypt.hash(password, salt, async function (err, hashedPassword) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Enter Password !!!' });
+          }
+
+          const newUser = new userModel({
+            name: name,
+            email: email,
+            password: hashedPassword,
+            otp: null,
+            createdAt: null,
+            expiresAt: null,
+            role: role
+          });
+
+          try {
+            const existingUser = await userModel.findOne({ email: email, isDeleted: false });
+
+            if (existingUser) {
+              res.status(409).json({ message: "Email Already Exists" });
+            } else {
+              await newUser.save();
+              const token = jwt.sign({ userID: newUser.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
+              res.status(201).json({ message: "Admin Registered Successfully", Admin: newUser });
+            }
+          } catch (error) {
+            res.status(500).json({ message: "Error saving user", error: error.message });
+          }
+        });
+      });
+    }
   } catch (error) {
-    res.status(400).json({message:"Error Creating Admin"})
+    res.status(400).json({ message: "Error", error: error.message });
   }
+
 }
+
+
 
 module.exports = {
   imageController,
@@ -559,4 +610,5 @@ module.exports = {
   updateOffer,
   deleteOffer,
   adminLogin,
+  createAdmin,
 };
