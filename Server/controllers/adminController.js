@@ -587,7 +587,38 @@ const createAdmin = async (req, res) => {
 
 }
 
+const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID" })
+    }
+    const superAdmin = await userModel.findOne({ _id: id, isDeleted: false });
+    if (!superAdmin) {
+      return res.status(400).json({ message: "Not Registered !" })
+    }
+    if (!superAdmin.role === 'Super Admin') {
+      return res.status(400).json({ message: "Unauthorized" })
+    }
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Enter Email" });
+    }
+    const admin = await userModel.findOne({ email, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Not Exist" })
+    }
+    if (!admin.role === 'admin') {
+      return res.status(400).json({ message: "Its not admin" })
+    }
 
+    admin.isDeleted = true;
+    admin.save();
+    res.status(200).json({ message: "Admin Delted Successfully" });
+  } catch (error) {
+    res.status(400).json({ message: "Error " })
+  }
+}
 
 module.exports = {
   imageController,
@@ -611,4 +642,5 @@ module.exports = {
   deleteOffer,
   adminLogin,
   createAdmin,
+  deleteAdmin,
 };

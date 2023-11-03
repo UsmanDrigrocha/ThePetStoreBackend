@@ -25,7 +25,8 @@ const {
     updateOffer,
     deleteOffer,
     adminLogin,
-    createAdmin
+    createAdmin,
+    deleteAdmin
 } = require('../controllers/adminController');
 const { validateAdmin } = require('../middlewares/validateAdmin');
 
@@ -52,6 +53,7 @@ route.get('/getAllOffers', validateAdmin, readOffers)
 route.post('/updateOffer/:id', validateAdmin, updateOffer)
 route.delete('/deleteOffer/:id', validateAdmin, deleteOffer)
 route.post('/createAdmin/:id',createAdmin)
+route.delete('/deleteAdmin/:id',deleteAdmin)
 
 
 
