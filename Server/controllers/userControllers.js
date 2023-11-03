@@ -68,7 +68,7 @@ const userRegister = async (req, res) => {
 const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await userModel.findOne({ email: email });
+        const user = await userModel.findOne({ email: email, isDeleted: false });
         if (!email || !password) { // if any field missing
             res.status(400).json({ message: "Some field missing !!!" });
         }
@@ -99,7 +99,7 @@ const userChangePassword = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (email && password) {
-            const existingUser = await userModel.findOne({ email: email });
+            const existingUser = await userModel.findOne({ email: email, isDeleted: false });
             if (!existingUser) {
                 res.status(400).json({ message: "User Doesn't exist" })
             } else {
@@ -138,7 +138,7 @@ const userResetPassword = async (req, res) => {
     try {
         const { email } = req.body;
         if (email) {
-            const existingUser = await userModel.findOne({ email: email });
+            const existingUser = await userModel.findOne({ email: email, isDeleted: false });
             if (existingUser) {
                 //Generate One Time Reset Link ; Valid for 5 Minutes
                 const token = jwt.sign({ userID: existingUser.id }, process.env.JWT_SECRET_KEY, { expiresIn: '5m' });
@@ -169,7 +169,7 @@ const userResetPassword = async (req, res) => {
 const verifyUserResetPassword = async (req, res) => {
     const { id, token } = req.params;
     try {
-        const user = await userModel.findById(id);
+        const user = await userModel.findById({ id, isDeleted: false });
         if (!user) {
             res.status(400).json({ message: "Invalid ID" });
         }
@@ -214,7 +214,7 @@ const generateOTP = async (req, res) => {
         if (!email) {
             res.status(400).json({ message: "Enter Email !!!" });
         } else {
-            const user = await userModel.findOne({ email: email })
+            const user = await userModel.findOne({ email: email, isDeleted: false })
             if (user) {
                 const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
 
@@ -259,7 +259,7 @@ const verifyOTP = async (req, res) => {
             return res.status(400).json({ message: "User ID and OTP are required." });
         }
 
-        const otpUser = await userModel.findOne({ email: email });
+        const otpUser = await userModel.findOne({ email: email, isDeleted: false });
 
         if (otpUser) {
             if (otpUser.otp === enteredOTP) {
@@ -333,7 +333,7 @@ const addUserProfile = async (req, res) => {
             return res.status(400).json({ message: "Enter ID" })
         }
 
-        const findUser = await userModel.findOne({ _id: id });
+        const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
             return res.status(400).json({ message: "User Not Registered" })
         }
@@ -369,7 +369,7 @@ const updateUserProfile = async (req, res) => {
             return res.status(400).json({ message: "Enter ID" })
         }
 
-        const findUser = await userModel.findOne({ _id: id });
+        const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
             return res.status(400).json({ message: "User Not Registered" })
         }
@@ -398,7 +398,7 @@ const addToWishlist = async (req, res) => {
             return res.status(400).json({ message: "Please provide both ID and Email" });
         }
 
-        const findUser = await userModel.findOne({ email });
+        const findUser = await userModel.findOne({ email, isDeleted: false });
 
         if (!findUser) {
             return res.status(400).json({ message: "User with this email is not registered" });
@@ -450,7 +450,7 @@ const deleteWishlist = async (req, res) => {
             return res.status(400).json({ message: "Please provide both ID and Email" });
         }
 
-        const findUser = await userModel.findOne({ email });
+        const findUser = await userModel.findOne({ email, isDeleted: false });
 
         if (!findUser) {
             return res.status(400).json({ message: "User with this email is not registered" });
@@ -491,7 +491,7 @@ const getUserWishlist = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Enter id" })
         }
-        const findUser = await userModel.findOne({ _id: id });
+        const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
             return res.status(400).json({ message: "ID not registered" });
         }
@@ -514,7 +514,7 @@ const addAddress = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Enter ID" })
         }
-        const findUser = await userModel.findOne({ _id: id });
+        const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
             return res.status(400).json({ message: "User Not Exist" })
         }
@@ -541,7 +541,7 @@ const readAddresses = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Enter ID" })
         }
-        const findUser = await userModel.findOne({ _id: id });
+        const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
             return res.status(400).json({ message: "User Doesn't Exist" })
         }
@@ -569,7 +569,7 @@ const updateUserAddresses = async (req, res) => {
         if (!addresses) {
             return res.status(400).json({ message: "Enter Address" })
         }
-        const findUser = await userModel.findOneAndUpdate({ _id: id }, {
+        const findUser = await userModel.findOneAndUpdate({ _id: id, isDeleted: false }, {
             addresses
         });
 
@@ -614,7 +614,7 @@ const deleteCartItem = async (req, res) => {
         }
 
 
-        const user = await userModel.findOne({ email });
+        const user = await userModel.findOne({ email, isDeleted: false });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -660,7 +660,7 @@ const addToCart = async (req, res) => {
             return res.status(400).json({ error: 'Invalid quantity' });
         }
 
-        const user = await userModel.findOne({ email });
+        const user = await userModel.findOne({ email, isDeleted: false });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -713,7 +713,7 @@ const showUserCart = async (req, res) => {
         if (!id) {
             return res.status(400).json({ message: "Enter ID" })
         }
-        const user = await userModel.findOne({ _id: id });
+        const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
             return res.status(400).json({ message: "User Not Registered" });
         }

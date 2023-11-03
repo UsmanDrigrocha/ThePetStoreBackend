@@ -530,6 +530,14 @@ async function updateProductOfferPrice(productId) {
   }
 }
 
+const createAdmin = async (req,res)=>{
+  try {
+    
+  } catch (error) {
+    res.status(400).json({message:"Error Creating Admin"})
+  }
+}
+
 module.exports = {
   imageController,
   showRegistedUsers,
