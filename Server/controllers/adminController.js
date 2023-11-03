@@ -620,6 +620,33 @@ const deleteAdmin = async (req, res) => {
   }
 }
 
+const getAllAdmins = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID" })
+    }
+    const superAdmin = await userModel.findOne({ _id: id, isDeleted: false });
+    if (!superAdmin) {
+      return res.status(400).json({ message: "Not Registered !" })
+    }
+    if (!superAdmin.role === 'Super Admin') {
+      return res.status(400).json({ message: "Unauthorized" })
+    }
+
+
+    const admin = await userModel.find({ role: 'admin' });
+    if (!admin) {
+      return res.status(400).json({ message: "Not Exist" })
+    }
+
+    res.status(200).json({ message: "Admins are", Admins: admin })
+  } catch (error) {
+    res.status(400).json({ message: "Error getting admins" })
+
+  }
+}
+
 module.exports = {
   imageController,
   showRegistedUsers,
@@ -643,4 +670,5 @@ module.exports = {
   adminLogin,
   createAdmin,
   deleteAdmin,
+  getAllAdmins,
 };

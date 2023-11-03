@@ -26,13 +26,13 @@ const {
     deleteOffer,
     adminLogin,
     createAdmin,
-    deleteAdmin
+    deleteAdmin,
+    getAllAdmins
 } = require('../controllers/adminController');
 const { validateAdmin } = require('../middlewares/validateAdmin');
 
 
 route.post('/adminLogin', adminLogin)
-
 route.post('/uploadBannerImage', validateAdmin, imageController);
 route.get('/getBannerImg', validateAdmin, showBannerImg);
 route.get('/getRegistedUsers', validateAdmin, showRegistedUsers);
@@ -52,9 +52,9 @@ route.post('/createOffer/:id', validateAdmin, createOffer)
 route.get('/getAllOffers', validateAdmin, readOffers)
 route.post('/updateOffer/:id', validateAdmin, updateOffer)
 route.delete('/deleteOffer/:id', validateAdmin, deleteOffer)
-route.post('/createAdmin/:id',createAdmin)
-route.delete('/deleteAdmin/:id',deleteAdmin)
-
+route.post('/createAdmin/:id', validateAdmin, createAdmin)
+route.delete('/deleteAdmin/:id', validateAdmin, deleteAdmin)
+route.get('/getAllAdmins/:id', validateAdmin, getAllAdmins)
 
 
 module.exports = route;
