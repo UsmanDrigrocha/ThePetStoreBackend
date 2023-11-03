@@ -9,9 +9,9 @@ const wishistSchema = new mongoose.Schema({
     }],
     userID: {
         type: mongoose.Schema.Types.ObjectID,
-        ref: 'registeredUsers',
+        ref: 'users',
     },
 });
 
 
-module.exports = mongoose.model('wishlistmodel', wishistSchema);
+module.exports = mongoose.model('wishlist', wishistSchema);

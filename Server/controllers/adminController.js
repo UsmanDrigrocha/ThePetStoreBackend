@@ -9,6 +9,10 @@ const path = require('path')
 const userModel = require('../models/User/userModel');
 const { Category, Product } = require('../models/Admin/productModel');
 const Offer = require('../models/Admin/offers')
+const bcrypt = require('bcrypt');
+
+
+
 
 //  ✅
 const showRegistedUsers = async (req, res) => {
@@ -23,6 +27,39 @@ const showRegistedUsers = async (req, res) => {
   } catch (error) {
     console.error('Error retrieving Users:', error);
     res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+//Login Account + Generate Token
+const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await userModel.findOne({ email: email });
+    if (!email || !password) { // if any field missing
+      res.status(400).json({ message: "Some field missing !!!" });
+    }
+    else {
+      if (!user) { // if email doesn't exist in DB
+        res.status(401).json({ message: "User Doesn't Exists" });
+      } else {
+        if (!user.role === 'Super Admin' || !user.role === 'admin') {
+          return res.send('ok');
+        }
+        const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
+        bcrypt.compare(password, user.password, function (err, result) {
+          //Comparing Password
+
+          if (result) { //if password is correct
+            req.session.adminToken = token;
+            res.status(202).json({ message: "User Logged In successfully", adminToken: token });
+          } else { // if wrong password
+            res.status(401).json({ message: "Wrong Password" });
+          }
+        });
+      }
+    }
+  } catch (error) {
+    res.status(400).json({ message: "Error while login", error: error.message });
   }
 };
 
@@ -512,5 +549,6 @@ module.exports = {
   createOffer,
   readOffers,
   updateOffer,
-  deleteOffer
+  deleteOffer,
+  adminLogin,
 };

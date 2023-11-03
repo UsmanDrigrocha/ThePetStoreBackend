@@ -13,9 +13,9 @@ const cartSchema = new mongoose.Schema({
     }],
     userID: {
         type: mongoose.Schema.Types.ObjectID,
-        ref: 'registeredUsers',
+        ref: 'users',
     },
 });
 
 
-module.exports = mongoose.model('cartModel', cartSchema);
+module.exports = mongoose.model('cart', cartSchema);

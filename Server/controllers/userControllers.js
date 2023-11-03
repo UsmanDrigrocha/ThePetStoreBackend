@@ -17,7 +17,7 @@ const WishlistModel = require('../models/User/WishlistModel')
 //Register Account ✅
 const userRegister = async (req, res) => {
     try {
-        const { name, email, password } = req.body;  // Taking name , email , password from body
+        const { name, email, password  } = req.body;  // Taking name , email , password from body
 
         if (!name || !email || !password) {
             res.status(400).json({ message: "Some field missing !!!" });
@@ -760,6 +760,29 @@ const validateCoupon = async (req, res) => {
     }
 }
 
+const createCheckOUtSession = async (req, res) => {
+    // try {
+    //     const { id } = req.params;
+    //     if (!id) {
+    //         return res.status(400).json({ message: "Enter ID" })
+    //     }
+    //     const findUser = await userModel.findOne({ _id: id });
+    //     if (!findUser) {
+    //         return res.status(400).json({ message: "User Not Registerd" });
+    //     }
+    //     const findUserCart = await CartModel.findOne({ userID: findUser._id }).populate('cart.productID').populate('userID');
+    //     if (!findUserCart) {
+    //         return res.status(400).json({ message: "User Cart Is Empty" })
+    //     }
+    //     const userCartObject = findUserCart.toObject();
+    //     delete userCartObject.userID;
+    //     res.send(userCartObject);
+    // } catch (error) {
+    //     console.error(error);
+    //     res.status(500).json({ error: 'Payment failed' });
+    // }
+}
+
 module.exports = {
     userRegister,
     userLogin,
@@ -783,5 +806,6 @@ module.exports = {
     validateCoupon,
     updateUserProfile,
     showUserCart,
+    createCheckOUtSession
 };
 

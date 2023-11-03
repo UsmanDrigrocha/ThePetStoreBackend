@@ -26,7 +26,8 @@ const {
     deleteCartItem,
     validateCoupon,
     updateUserProfile,
-    showUserCart
+    showUserCart,
+    createCheckOUtSession
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -44,20 +45,21 @@ route.post('/createProfile/:id', addUserProfile) // Create User Profile Image
 route.post('/updateProfile/:id', updateUserProfile) // Update User Profile Image
 
 
-route.get('/getAllCategories', getProductCategories)
-route.post('/uploadImage', uploadImage)
-route.post('/addToWishlist/:id', addToWishlist)
-route.post('/removeFromWishlist/:id', deleteWishlist)
-route.get('/getUserWishlist/:id', getUserWishlist)
-route.post('/addAddress/:id', addAddress)
-route.get('/getUserAddresses/:id', readAddresses)
-route.post('/updateUserAddresses/:id', updateUserAddresses)
-route.get('/newArrivals', newArrivals)
-route.post('/addToCart/:id', addToCart)
-route.post('/deleteCartItem/:id', deleteCartItem)
-route.post('/updateCartItem/:id', addToCart)
-route.post('/validateCoupon/:id', validateCoupon)
-route.get('/getUserCart/:id',showUserCart)
+route.get('/getAllCategories', validateToken, getProductCategories)
+route.post('/uploadImage', validateToken, uploadImage)
+route.post('/addToWishlist/:id', validateToken, addToWishlist)
+route.post('/removeFromWishlist/:id', validateToken, deleteWishlist)
+route.get('/getUserWishlist/:id', validateToken, getUserWishlist)
+route.post('/addAddress/:id', validateToken, addAddress)
+route.get('/getUserAddresses/:id', validateToken, readAddresses)
+route.post('/updateUserAddresses/:id', validateToken, updateUserAddresses)
+route.get('/newArrivals', validateToken, newArrivals)
+route.post('/addToCart/:id', validateToken, addToCart)
+route.post('/deleteCartItem/:id', validateToken, deleteCartItem)
+route.post('/updateCartItem/:id', validateToken, addToCart)
+route.post('/validateCoupon/:id', validateToken, validateCoupon)
+route.get('/getUserCart/:id', validateToken, showUserCart)
 
+route.post('/createCheckOUtSession/:id', createCheckOUtSession)
 
 module.exports = route;

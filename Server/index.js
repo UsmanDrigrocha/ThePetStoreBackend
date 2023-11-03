@@ -22,8 +22,6 @@ app.use(
   })
 );
 
-// From this we can access ; image with url
-// api path / for getting image
 app.use('/', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use('/api/user', userRoutes);
@@ -40,3 +38,11 @@ app.get('/', (req, res) => {
 });
 
 
+// --Firebase
+// var admin = require("firebase-admin");
+
+// var serviceAccount = require("./config/service-account/the-pet-store-928bf-firebase-adminsdk-2wk4q-f2aa5302d6.json");
+
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount)
+// });
