@@ -9,7 +9,7 @@ const validateToken = async (req, res, next) => {
         const clientToken = req.headers.authorization.split('Bearer ')[1];
 
         if (!userToken || userToken !== clientToken) {
-            return res.status(401).send('Unauthorized');
+            return res.status(401).send('Unauthorized User !');
         }
         next();
     } catch (error) {

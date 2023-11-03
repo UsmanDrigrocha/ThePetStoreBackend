@@ -46,7 +46,7 @@ route.post('/updateProfile/:id', updateUserProfile) // Update User Profile Image
 
 
 route.get('/getAllCategories', validateToken, getProductCategories)
-route.post('/uploadImage', validateToken, uploadImage)
+route.post('/uploadImage', uploadImage)
 route.post('/addToWishlist/:id', validateToken, addToWishlist)
 route.post('/removeFromWishlist/:id', validateToken, deleteWishlist)
 route.get('/getUserWishlist/:id', validateToken, getUserWishlist)

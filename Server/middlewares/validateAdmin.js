@@ -9,7 +9,8 @@ const validateAdmin = async (req, res, next) => {
         const clientToken = req.headers.authorization.split('Bearer ')[1];
 
         if (!adminToken || adminToken !== clientToken) {
-            return res.status(401).send('Unauthorized');
+            res.status(401)
+            return res.send('Unauthorized');
         }
         next();
     } catch (error) {
