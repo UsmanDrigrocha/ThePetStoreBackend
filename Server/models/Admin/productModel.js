@@ -12,10 +12,9 @@ const Schema = mongoose.Schema;
 // Category Schema
 const categorySchema = new Schema({
     name: { type: String },
-    date: { type: Date, default: Date.now },
     image: String,
-    parentId: { type: String }
-});
+    categoryID: { type: String }
+}, { timestamps: true });
 
 
 // Product Schema

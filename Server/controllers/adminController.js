@@ -80,7 +80,7 @@ const createCategory = async (req, res) => {
     const { id } = req.params;
     const admin = await userModel.findOne({ _id: id, isDeleted: false });
     if (!admin) {
-      return res.status(400).json({ message: "User Not Exist" })
+      return res.status(400).json({ message: "User Not Exist !!!!!!!!" })
     }
     if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
       return res.send('Unauthorized Person');
@@ -101,13 +101,13 @@ const createCategory = async (req, res) => {
 
     if (req.body.categoryID) {
       const categoryID = new mongoose.Types.ObjectId(req.body.categoryID); // Convert string to ObjectID
-      const findCategory = await Category.findOne({ _id: categoryID });
+      const findCategory = await Category.findOne({ _id: req.body.categoryID });
 
 
       if (findCategory) {
         categoryData.categoryID = categoryID;
       } else {
-        return res.status(400).json({ message: "No Such categoryID Exist" });
+        return res.status(400).json({ message: "No Such category ID Exist" });
       }
     }
 
