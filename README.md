@@ -17,8 +17,3 @@ STRIPE_SECRET_KEY=
 cd server
 node index.js
 ```
-OR
-``` 
-npm i nodemon
-nodemon index.js 
-```
