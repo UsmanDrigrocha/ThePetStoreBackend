@@ -43,7 +43,7 @@ const adminLogin = async (req, res) => {
         res.status(401).json({ message: "User Doesn't Exists" });
       } else {
         if (!user.role === 'Super Admin' || !user.role === 'admin') {
-          return res.send('ok');
+          return res.send('Unauthorized to LOGIN');
         }
         const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
         bcrypt.compare(password, user.password, function (err, result) {
@@ -67,12 +67,6 @@ const showBannerImg = async (req, res) => {
   try {
     const data = await bannerModel.find({});
 
-    //---- Display the data
-    // data.forEach(item => {
-    //     // You can access other fields here as well
-    // });
-
-    // Respond with the data in an HTTP response
     res.status(200).json(data);
   } catch (error) {
     console.error('Error retrieving data:', error);
@@ -83,7 +77,14 @@ const showBannerImg = async (req, res) => {
 //  ✅
 const createCategory = async (req, res) => {
   try {
-
+    const { id } = req.params;
+    const admin = await userModel.findOne({ _id: id, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "User Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
     const { name, image } = req.body;
     if (!name) {
       return res.status(400).json({ message: "Enter Name of Category !!!" });
@@ -91,6 +92,7 @@ const createCategory = async (req, res) => {
     if (!image) {
       return res.status(400).json({ message: "Enter Image of Category !!!" });
     }
+
 
     const categoryData = new Category({
       name: name,
@@ -142,7 +144,17 @@ const readOneCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, image, parentId } = req.body;
+    const { name, image, parentId, adminId } = req.body;
+    if (!adminId) {
+      return res.status(400).json({ message: "Enter All Fields" })
+    }
+    const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
 
     if (!id) {
       return res.status(400).json({ message: "Enter ID" });
@@ -221,10 +233,20 @@ const deleteCategory = async (req, res) => {
     if (!id) {
       return res.status(400).json({ message: "Enter ID" });
     }
+    const { adminId } = req.body;
+    if (!adminId) {
+      return res.status(400).json({ message: "Enter Admin ID" })
+    }
+    const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
 
     const objId = new mongoose.Types.ObjectId(id);
     const existingCategory = await Category.findOneAndDelete(objId);
-
     res.status(200).json({ message: "Category Deleted", data: existingCategory });
   } catch (error) {
     res.status(500).json({ message: "Error updating category", error: error.message });
@@ -242,6 +264,18 @@ const createProduct = async (req, res) => {
       const existingCategory = await Category.findById(objId);
       if (!existingCategory) {
         return res.status(400).json({ message: "No Such Parent Exist" });
+      }
+
+      const { adminId } = req.body;
+      if (!adminId) {
+        return res.status(400).json({ message: "Enter Admin ID" })
+      }
+      const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+      if (!admin) {
+        return res.status(400).json({ message: "Admin Not Exist" })
+      }
+      if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+        return res.send('Unauthorized Person');
       }
       const newProduct = new Product({
         name,
@@ -330,6 +364,17 @@ const UpdateProduct = async (req, res) => {
     if (!findProduct) {
       return res.status(400).json({ message: "Product Not Found" })
     }
+    const { adminId } = req.body;
+    if (!adminId) {
+      return res.status(400).json({ message: "Enter Admin ID" })
+    }
+    const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
     if (name) {
       findProduct.name = name;
     }
@@ -369,6 +414,17 @@ const UpdateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    const { adminId } = req.body;
+    if (!adminId) {
+      return res.status(400).json({ message: "Enter Admin ID" })
+    }
+    const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
     const findProduct = await Product.findOneAndDelete({ _id: id });
     if (!findProduct) {
       return res.status(400).json({ message: "Product Not Found" })
@@ -386,6 +442,19 @@ const createOffer = async (req, res) => {
     if (!id) {
       return res.status(400).json({ message: "Enter Product ID" });
     }
+
+    const { adminId } = req.body;
+    if (!adminId) {
+      return res.status(400).json({ message: "Enter Admin ID" })
+    }
+    const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
+
     const { discountPercentage, expirationDate } = req.body;
     if (!discountPercentage || !expirationDate) {
       return res.status(400).json({ message: "Enter All Fields" });
@@ -454,6 +523,17 @@ const updateOffer = async (req, res) => {
     if (!id) {
       return res.status(400).json({ message: "Enter ID !" });
     }
+    const { adminId } = req.body;
+    if (!adminId) {
+      return res.status(400).json({ message: "Enter Admin ID" })
+    }
+    const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
     const findOffer = await Offer.findOne({ _id: id });
 
     if (!findOffer) {
@@ -491,6 +571,19 @@ const deleteOffer = async (req, res) => {
     if (!id) {
       return res.status(400).json({ message: "Enter ID !" });
     }
+
+    const { adminId } = req.body;
+    if (!adminId) {
+      return res.status(400).json({ message: "Enter Admin ID" })
+    }
+    const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
+    
     const findProduct = await Product.findOne({ _id: id });
     if (!findProduct) {
       return res.status(400).json({ message: "Product Not Found" })
