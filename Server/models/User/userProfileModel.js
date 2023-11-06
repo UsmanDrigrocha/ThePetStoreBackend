@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectID,
         ref: 'users',
     }
-});
+}, { timestamps: true });
 
 
 module.exports = mongoose.model('userprofile', userSchema);

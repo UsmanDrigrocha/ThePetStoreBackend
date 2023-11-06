@@ -8,6 +8,7 @@ const offerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectID,
         ref: 'Product',
     }
-}
+},
+{ timestamps: true }
 );
 module.exports = mongoose.model('offer', offerSchema);

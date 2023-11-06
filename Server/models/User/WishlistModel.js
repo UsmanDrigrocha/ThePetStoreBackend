@@ -11,7 +11,7 @@ const wishistSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectID,
         ref: 'users',
     },
-});
+}, { timestamps: true });
 
 
 module.exports = mongoose.model('wishlist', wishistSchema);

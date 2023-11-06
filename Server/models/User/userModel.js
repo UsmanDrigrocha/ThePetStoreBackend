@@ -16,8 +16,8 @@ const userSchema = new mongoose.Schema({
   },
   password: { type: String },
   otp: String,
-  createdAt: { type: Date, default: Date.now },
-  expiresAt: Date,
+  otpCreatedAt: Date,
+  otpExpiredAt: Date,
   isDeleted: { type: Boolean, default: false },
   role: {
     type: String,
@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
   //         default: 1,
   //     }
   // }]
-});
+}, { timestamps: true });
 
 
 module.exports = mongoose.model('users', userSchema);

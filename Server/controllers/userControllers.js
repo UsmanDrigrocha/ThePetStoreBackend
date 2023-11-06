@@ -39,8 +39,8 @@ const userRegister = async (req, res) => {
                         email: email,
                         password: hashedPassword,
                         otp: null,
-                        createdAt: null,
-                        expiresAt: null,
+                        otpCreatedAt: null,
+                        otpExpiredAt: null,
                     });
 
                     try {
@@ -222,8 +222,8 @@ const generateOTP = async (req, res) => {
                 const expiredAtDateTime = new Date(createdAtDateTime.getTime() + 90000); // 1.5 Minute
 
                 const newUser = await userModel.findOneAndUpdate({ email: email }, {
-                    createdAt: createdAtDateTime,
-                    expiresAt: expiredAtDateTime,
+                    otpCreatedAt: createdAtDateTime,
+                    otpExpiredAt: expiredAtDateTime,
                     otp: otpCode
                 });
 
@@ -237,6 +237,7 @@ const generateOTP = async (req, res) => {
 
                 if (emailSent) {
                     res.status(200).json({ message: 'OTP Email sent successfully', Email: recipientEmail });
+                    await newUser.save()
                 } else {
                     res.status(500).json({ message: 'Email sending failed' });
                 }
@@ -295,7 +296,7 @@ const imageFilter = (req, file, cb) => {
 };
 const store = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './public/uploads');
+        cb(null, './uploads');
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

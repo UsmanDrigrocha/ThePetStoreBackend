@@ -20,6 +20,7 @@ const categorySchema = new Schema({
 
 // Product Schema
 const productSchema = new Schema({
+
     name: { type: String, required: true },
     description: {
         type: String,
@@ -32,7 +33,6 @@ const productSchema = new Schema({
     price: Number,
     size: String, // array
     quantity: Number,
-    date: { type: Date, default: Date.now },
     parentId: { type: String, required: true }, // Parent Required
     animal: { type: String, required: true },
     coupon: {
@@ -46,7 +46,8 @@ const productSchema = new Schema({
         expirationDate: { type: Date },
     },
     offerPrice: { type: Number, default: 0 }
-});
+}, { timestamps: true });
+
 
 
 const Category = mongoose.model('Category', categorySchema);
