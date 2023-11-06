@@ -12,7 +12,9 @@ const { Product } = require('../models/Admin/productModel');
 const userProfile = require('../models/User/userProfileModel');
 const userProfileModel = require('../models/User/userProfileModel');
 const CartModel = require('../models/User/cartModel');
-const WishlistModel = require('../models/User/WishlistModel')
+const WishlistModel = require('../models/User/WishlistModel');
+
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 //Register Account ✅
 const userRegister = async (req, res) => {
@@ -762,7 +764,48 @@ const validateCoupon = async (req, res) => {
 }
 
 const createCheckOUtSession = async (req, res) => {
-    res.send('Unimplemented')
+
+    try {
+        const { products } = req.body;
+
+        if (!products) {
+            return res.status(400).json({ message: "Enter Products in req.body" });
+        }
+
+        const lineItems = [];
+        for (const product of products) {
+            const productData = await Product.findById(product._id);
+
+            if (!productData) {
+                return res.status(400).json({ message: "Product not found" });
+            }
+
+            lineItems.push({
+                price_data: {
+                    currency: "USD",
+                    product_data: {
+                        name: productData.name,
+                        images: [productData.images[0]] // Assuming you want to use the first image of product to show on checkout page 
+                    },
+                    unit_amount: productData.price * 100,
+                },
+                quantity: product.quantity,
+            });
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: lineItems,
+            mode: "payment",
+            success_url: "https://your-success-url.com", // Replace with your success URL
+            cancel_url: "https://your-cancel-url.com", // Replace with your cancel URL
+        });
+
+        res.status(200).json({ message: "Stripe Session ID Created !", ID: session.id });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({ message: "Error creating checkout session" });
+    }
 }
 
 module.exports = {
