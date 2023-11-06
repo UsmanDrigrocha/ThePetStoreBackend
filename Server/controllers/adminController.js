@@ -99,15 +99,15 @@ const createCategory = async (req, res) => {
       image: image,
     });
 
-    if (req.body.parentId) {
-      const parentId = new mongoose.Types.ObjectId(req.body.parentId); // Convert string to ObjectID
-      const findCategory = await Category.findOne({ _id: parentId });
+    if (req.body.categoryID) {
+      const categoryID = new mongoose.Types.ObjectId(req.body.categoryID); // Convert string to ObjectID
+      const findCategory = await Category.findOne({ _id: categoryID });
 
 
       if (findCategory) {
-        categoryData.parentId = parentId;
+        categoryData.categoryID = categoryID;
       } else {
-        return res.status(400).json({ message: "No Such parentId Exist" });
+        return res.status(400).json({ message: "No Such categoryID Exist" });
       }
     }
 
@@ -144,7 +144,7 @@ const readOneCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, image, parentId, adminId } = req.body;
+    const { name, image, categoryID, adminId } = req.body;
     if (!adminId) {
       return res.status(400).json({ message: "Enter All Fields" })
     }
@@ -175,8 +175,8 @@ const updateCategory = async (req, res) => {
     if (image) {
       existingCategory.image = image;
     }
-    if (parentId) {
-      existingCategory.parentId = parentId;
+    if (categoryID) {
+      existingCategory.categoryID = categoryID;
     }
 
     const updatedCategory = await existingCategory.save();
@@ -216,7 +216,7 @@ const imageController = async (req, res, next) => {
 const getChildCategories = async (req, res) => {
   try {
     const { id } = req.params;
-    const findChildCategory = await Category.find({ parentId: id });
+    const findChildCategory = await Category.find({ categoryID: id });
     if (!findChildCategory) {
       return res.status(200).json({ message: "Invalid ID / Not Exist" })
     }
@@ -256,11 +256,11 @@ const deleteCategory = async (req, res) => {
 //  ✅
 const createProduct = async (req, res) => {
   try {
-    const { name, price, description, size, quantity, animal, parentId, coupon, images } = req.body;
-    if (!name || !price || !description || !size || !quantity || !parentId || !animal || !images) {
+    const { name, price, description, size, quantity, animal, categoryID, coupon, images } = req.body;
+    if (!name || !price || !description || !size || !quantity || !categoryID || !animal || !images) {
       return res.status(400).json({ message: "Enter all Fields" })
     } else {
-      const objId = new mongoose.Types.ObjectId(parentId);
+      const objId = new mongoose.Types.ObjectId(categoryID);
       const existingCategory = await Category.findById(objId);
       if (!existingCategory) {
         return res.status(400).json({ message: "No Such Parent Exist" });
@@ -284,7 +284,7 @@ const createProduct = async (req, res) => {
         quantity,
         animal,
         size,
-        parentId,
+        categoryID,
         images
       })
       if (coupon) {
@@ -325,7 +325,7 @@ const getAllProducts = async (req, res) => {
 const getProductsByCategories = async (req, res) => {
   try {
     const { id } = req.params;
-    const findProducts = await Product.find({ parentId: id });
+    const findProducts = await Product.find({ categoryID: id });
     if (!findProducts) {
       return res.status(200).json({ message: "Invalid ID / Not Exist" })
     }
@@ -359,7 +359,7 @@ const getOneProduct = async (req, res) => {
 const UpdateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, size, quantity, animal, parentId, coupon, images } = req.body;
+    const { name, price, description, size, quantity, animal, categoryID, coupon, images } = req.body;
     const findProduct = await Product.findOne({ _id: id });
     if (!findProduct) {
       return res.status(400).json({ message: "Product Not Found" })
@@ -393,8 +393,8 @@ const UpdateProduct = async (req, res) => {
     if (animal) {
       findProduct.animal = animal;
     }
-    if (parentId) {
-      findProduct.parentId = parentId;
+    if (categoryID) {
+      findProduct.categoryID = categoryID;
     }
     if (coupon) {
       findProduct.coupon = coupon;

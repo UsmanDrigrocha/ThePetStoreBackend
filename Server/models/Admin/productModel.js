@@ -33,7 +33,7 @@ const productSchema = new Schema({
     price: Number,
     size: String, // array
     quantity: Number,
-    parentId: { type: String, required: true }, // Parent Required
+    categoryID: { type: String, required: true }, // Parent Required
     animal: { type: String, required: true },
     coupon: {
         code: { type: String },
