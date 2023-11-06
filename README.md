@@ -9,6 +9,7 @@ Create your own .env file which contains
 PORT=
 JWT_SECRET_KEY=
 DB_VAR=
+STRIPE_SECRET_KEY=
 ```
 
 # To Run Server
