@@ -808,6 +808,22 @@ const createCheckOUtSession = async (req, res) => {
     }
 }
 
+const createOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID !" });
+        }
+        const user = await userModel.findOne({ _id: id, isDeleted: false });
+        if (!user) {
+            return res.status(400).json({ message: "User Not Exist !" });
+        }
+        res.status(200).json({ message: "Order Created !" })
+    } catch (error) {
+        res.status(400).json({ message: "Error Creating Order" })
+    }
+}
+
 module.exports = {
     userRegister,
     userLogin,
@@ -831,6 +847,7 @@ module.exports = {
     validateCoupon,
     updateUserProfile,
     showUserCart,
-    createCheckOUtSession
+    createCheckOUtSession,
+    createOrder
 };
 

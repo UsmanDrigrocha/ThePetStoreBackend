@@ -27,7 +27,8 @@ const {
     validateCoupon,
     updateUserProfile,
     showUserCart,
-    createCheckOUtSession
+    createCheckOUtSession,
+    createOrder
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -61,5 +62,6 @@ route.post('/validateCoupon/:id', validateToken, validateCoupon)
 route.get('/getUserCart/:id', validateToken, showUserCart)
 
 route.post('/createCheckOUtSession/:id', createCheckOUtSession)
+route.post("/createOrder/:id",createOrder)
 
 module.exports = route;
