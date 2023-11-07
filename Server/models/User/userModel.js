@@ -22,7 +22,8 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     default: 'user'
-  }
+  },
+  isActive: { type: Boolean, default: false }
   // profileImage: { type: String },
   // wishlist: {
   //   type: [String],

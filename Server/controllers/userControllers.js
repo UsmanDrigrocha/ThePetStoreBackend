@@ -80,6 +80,9 @@ const userLogin = async (req, res) => {
             if (!user) { // if email doesn't exist in DB
                 res.status(401).json({ message: "User Doesn't Exists" });
             } else {
+                if (!user.isActive === true) {
+                    return res.status(400).json({ message: "Verify first" })
+                }
                 const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
                 bcrypt.compare(password, user.password, function (err, result) {
                     //Comparing Password
@@ -269,7 +272,9 @@ const verifyOTP = async (req, res) => {
         if (otpUser) {
             if (otpUser.otp === enteredOTP) {
                 const currentTime = new Date();
-                if (otpUser.expiresAt >= currentTime) {
+                if (otpUser.otpExpiredAt >= currentTime) {
+                    otpUser.isActive = true;
+                    otpUser.save();
                     res.status(200).json({ message: "OTP Verified Successfully" });
                 } else {
                     res.status(400).json({ message: "Invalid OTP" }); // expired
