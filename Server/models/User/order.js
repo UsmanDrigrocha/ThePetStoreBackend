@@ -9,6 +9,7 @@ const orderSchema = new mongoose.Schema({
         quantity: {
             type: Number,
         },
+        totalPrice: { type: Number },
         paymentStatus: { type: String, default: 'pendning' },
         orderStatus: { type: String, default: 'pending' }
     }],

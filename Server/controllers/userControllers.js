@@ -681,13 +681,16 @@ const addToCart = async (req, res) => {
         if (!findProduct) {
             return res.status(400).json({ message: "Product Not Found" });
         }
+
         const userCart = await CartModel.findOne({ userID: user._id });
 
         if (!userCart) {
+            let totalPrice = findProduct.price * quantity;
             const newCart = new CartModel({
                 cart: [{
                     productID: id,
                     quantity,
+                    totalPrice
                 }],
                 userID: user._id
             });
@@ -697,24 +700,30 @@ const addToCart = async (req, res) => {
             if (quantity > findProduct.quantity) {
                 return res.status(400).json({ message: "This Quantity is not available in Stock" });
             }
+            
+            let totalPrice = findProduct.price * quantity;
             const cartItem = userCart.cart.find(item => item.productID == id);
+
             if (!cartItem) {
                 userCart.cart.push({
                     productID: id,
                     quantity,
+                    totalPrice
                 });
-            }
-            else {
+            } else {
+                // Update quantity and totalPrice when the item already exists in the cart
                 cartItem.quantity = quantity;
+                cartItem.totalPrice = totalPrice; // Update totalPrice
             }
+
             await userCart.save();
             return res.status(200).json({ message: 'Cart item quantity updated', cart: userCart });
         }
     } catch (err) {
-
         return res.status(500).json({ error: 'Error in Cart' });
     }
 };
+
 
 // Show User Cart  ✅
 const showUserCart = async (req, res) => {
