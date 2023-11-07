@@ -700,7 +700,7 @@ const addToCart = async (req, res) => {
             if (quantity > findProduct.quantity) {
                 return res.status(400).json({ message: "This Quantity is not available in Stock" });
             }
-            
+
             let totalPrice = findProduct.price * quantity;
             const cartItem = userCart.cart.find(item => item.productID == id);
 
@@ -824,19 +824,83 @@ const createCheckOUtSession = async (req, res) => {
 }
 
 
+
+
+// const createOrder = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         if (!id) {
+//             return res.status(400).json({ message: "Enter ID !" });
+//         }
+
+//         const user = await userModel.findOne({ _id: id, isDeleted: false });
+//         if (!user) {
+//             return res.status(400).json({ message: "User Not Exist !" });
+//         }
+
+//         const userCart = await CartModel.findOne({ userID: id }).populate('cart.productID').populate('userID');
+
+//         if (!userCart) {
+//             return res.status(400).json({ message: "User's cart not found" });
+//         }
+
+//         if (userCart.cart.length === 0) {
+//             return res.status(400).json({ message: "User's cart is empty" });
+//         }
+
+//         let order = await Order.findOne({ userID: id, orderStatus: 'pending' });
+
+//         if (!order) {
+//             order = new Order({
+//                 order: [],
+//                 userID: id,
+//             });
+//         }
+
+//         let totalOrderPrice = 0; // Initialize the total order price.
+
+//         for (const cartItem of userCart.cart) {
+//             const productPrice = cartItem.productID.price; // Assuming you have a 'price' field in the 'Product' model.
+//             const itemTotalPrice = productPrice * cartItem.quantity;
+//             totalOrderPrice += itemTotalPrice; // Add the item's total price to the order's total price.
+
+//             order.order.push({
+//                 productID: cartItem.productID._id,
+//                 quantity: cartItem.quantity,
+//                 paymentStatus: 'pending',
+//                 orderStatus: 'pending',
+//                 totalPrice: itemTotalPrice, // Store the item's total price in the order.
+//             });
+//         }
+
+//         order.totalPrice = totalOrderPrice; // Store the total order price in the order.
+
+//         await order.save();
+
+//         userCart.cart = [];
+
+//         await userCart.save();
+
+//         res.status(200).json({ message: "Order Created!", order });
+//     } catch (error) {
+//         res.status(400).json({ message: "Error Creating Order", Error: error.message });
+//     }
+// };
+
+
 const createOrder = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID !" });
+            return res.status(400).json({ message: "Enter ID!" });
         }
 
         const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
-            return res.status(400).json({ message: "User Not Exist !" });
+            return res.status(400).json({ message: "User Not Exist!" });
         }
 
-        const userCart = await CartModel.findOne({ userID: id }).populate('cart.productID').populate('userID');
+        const userCart = await CartModel.findOne({ userID: id }).populate('cart.productID');
 
         if (!userCart) {
             return res.status(400).json({ message: "User's cart not found" });
@@ -846,7 +910,7 @@ const createOrder = async (req, res) => {
             return res.status(400).json({ message: "User's cart is empty" });
         }
 
-        let order = await Order.findOne({ userID: id, orderStatus: 'pending' });
+        let order = await Order.findOne({ userID: id });
 
         if (!order) {
             order = new Order({
@@ -855,14 +919,23 @@ const createOrder = async (req, res) => {
             });
         }
 
+        let totalOrderPrice = 0; // Initialize the total order price.
+
         for (const cartItem of userCart.cart) {
+            const productPrice = cartItem.productID.price; // Assuming you have a 'price' field in the 'Product' model.
+            const itemTotalPrice = productPrice * cartItem.quantity;
+            totalOrderPrice += itemTotalPrice; // Add the item's total price to the order's total price.
+
             order.order.push({
                 productID: cartItem.productID._id,
                 quantity: cartItem.quantity,
                 paymentStatus: 'pending',
                 orderStatus: 'pending',
+                totalPrice: itemTotalPrice, // Store the item's total price in the order.
             });
         }
+
+        order.totalPrice = totalOrderPrice; // Store the total order price in the order.
 
         await order.save();
 
@@ -874,7 +947,7 @@ const createOrder = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: "Error Creating Order", Error: error.message });
     }
-};
+}
 
 const getUserOrders = async (req, res) => {
     try {
