@@ -28,7 +28,9 @@ const {
     updateUserProfile,
     showUserCart,
     createCheckOUtSession,
-    createOrder
+    createOrder,
+    getUserOrders,
+    cancelOrder
 } = require('../controllers/userControllers');
 
 const { getProductCategories } = require('../controllers/adminController')
@@ -46,22 +48,24 @@ route.post('/createProfile/:id', addUserProfile) // Create User Profile Image
 route.post('/updateProfile/:id', updateUserProfile) // Update User Profile Image
 
 
-route.get('/getAllCategories', validateToken, getProductCategories)
+route.get('/getAllCategories', getProductCategories)
 route.post('/uploadImage', uploadImage)
-route.post('/addToWishlist/:id', validateToken, addToWishlist)
-route.post('/removeFromWishlist/:id', validateToken, deleteWishlist)
-route.get('/getUserWishlist/:id', validateToken, getUserWishlist)
-route.post('/addAddress/:id', validateToken, addAddress)
-route.get('/getUserAddresses/:id', validateToken, readAddresses)
-route.post('/updateUserAddresses/:id', validateToken, updateUserAddresses)
-route.get('/newArrivals', validateToken, newArrivals)
-route.post('/addToCart/:id', validateToken, addToCart)
-route.post('/deleteCartItem/:id', validateToken, deleteCartItem)
-route.post('/updateCartItem/:id', validateToken, addToCart)
-route.post('/validateCoupon/:id', validateToken, validateCoupon)
+route.post('/addToWishlist/:id', addToWishlist)
+route.post('/removeFromWishlist/:id', deleteWishlist)
+route.get('/getUserWishlist/:id', getUserWishlist)
+route.post('/addAddress/:id', addAddress)
+route.get('/getUserAddresses/:id', readAddresses)
+route.post('/updateUserAddresses/:id', updateUserAddresses)
+route.get('/newArrivals', newArrivals)
+route.post('/addToCart/:id', addToCart)
+route.post('/deleteCartItem/:id', deleteCartItem)
+route.post('/updateCartItem/:id', addToCart)
+route.post('/validateCoupon/:id', validateCoupon)
 route.get('/getUserCart/:id', validateToken, showUserCart)
 
 route.post('/createCheckOUtSession/:id', createCheckOUtSession)
-route.post("/createOrder/:id",createOrder)
+route.post("/createOrder/:id", createOrder)
+route.get('/getUserOrders/:id', getUserOrders)
+route.post('/cancelOrder/:id', cancelOrder)
 
 module.exports = route;

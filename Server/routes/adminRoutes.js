@@ -27,7 +27,8 @@ const {
     adminLogin,
     createAdmin,
     deleteAdmin,
-    getAllAdmins
+    getAllAdmins,
+    editOrderStatus
 } = require('../controllers/adminController');
 const { validateAdmin } = require('../middlewares/validateAdmin');
 
@@ -56,5 +57,6 @@ route.post('/createAdmin/:id', createAdmin);
 route.delete('/deleteAdmin/:id', deleteAdmin);
 route.get('/getAllAdmins/:id', getAllAdmins);
 
+route.post('/updateOrderStatus/:id',editOrderStatus)
 
 module.exports = route;

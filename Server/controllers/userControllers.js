@@ -13,8 +13,10 @@ const userProfile = require('../models/User/userProfileModel');
 const userProfileModel = require('../models/User/userProfileModel');
 const CartModel = require('../models/User/cartModel');
 const WishlistModel = require('../models/User/WishlistModel');
-
+const Order = require('../models/User/order')
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+const mongoose = require('mongoose')
 
 //Register Account ✅
 const userRegister = async (req, res) => {
@@ -764,7 +766,6 @@ const validateCoupon = async (req, res) => {
 }
 
 const createCheckOUtSession = async (req, res) => {
-
     try {
         const { products } = req.body;
 
@@ -785,7 +786,7 @@ const createCheckOUtSession = async (req, res) => {
                     currency: "USD",
                     product_data: {
                         name: productData.name,
-                        images: [productData.images[0]] // Assuming you want to use the first image of product to show on checkout page 
+                        images: [productData.images[0]] // using the first image of product to show on checkout page 
                     },
                     unit_amount: productData.price * 100,
                 },
@@ -808,21 +809,116 @@ const createCheckOUtSession = async (req, res) => {
     }
 }
 
+
 const createOrder = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
             return res.status(400).json({ message: "Enter ID !" });
         }
+
         const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
             return res.status(400).json({ message: "User Not Exist !" });
         }
-        res.status(200).json({ message: "Order Created !" })
+
+        const userCart = await CartModel.findOne({ userID: id }).populate('cart.productID').populate('userID');
+
+        if (!userCart) {
+            return res.status(400).json({ message: "User's cart not found" });
+        }
+
+        if (userCart.cart.length === 0) {
+            return res.status(400).json({ message: "User's cart is empty" });
+        }
+
+        let order = await Order.findOne({ userID: id, orderStatus: 'pending' });
+
+        if (!order) {
+            order = new Order({
+                order: [],
+                userID: id,
+            });
+        }
+
+        for (const cartItem of userCart.cart) {
+            order.order.push({
+                productID: cartItem.productID._id,
+                quantity: cartItem.quantity,
+                paymentStatus: 'pending',
+                orderStatus: 'pending',
+            });
+        }
+
+        await order.save();
+
+        userCart.cart = [];
+
+        await userCart.save();
+
+        res.status(200).json({ message: "Order Created!", order });
     } catch (error) {
-        res.status(400).json({ message: "Error Creating Order" })
+        res.status(400).json({ message: "Error Creating Order", Error: error.message });
+    }
+};
+
+const getUserOrders = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID" })
+        }
+        const user = await userModel.findOne({ _id: id, isDeleted: false })
+        if (!user) {
+            return res.status(400).json({ message: "User Not Found" });
+        }
+        const userOrders = await Order.findOne({ userID: id });
+        res.status(200).json({ message: "User Orders Found", userOrders })
+    } catch (error) {
+        res.status(400).json({ message: "Error Getting User's Orders" })
     }
 }
+
+const cancelOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { productID } = req.body;
+
+        if (!productID) {
+            return res.status(400).json({ message: "Enter Product ID" });
+        }
+
+        if (!id) {
+            return res.status(400).json({ message: "Enter ID !!!" });
+        }
+
+        const userOrder = await Order.findOne({ userID: id });
+
+        if (!userOrder || userOrder.order.length === 0) {
+            return res.status(400).json({ message: "No Order Found" });
+        }
+
+        // Find the index of the product within the order
+        const orderIndex = userOrder.order.findIndex(order => order.productID == productID);
+
+        if (orderIndex !== -1) {
+            // Set the status of the product to "cancelled" (you may have a different status field)
+            userOrder.order[orderIndex].orderStatus = "cancelled";
+
+            // Save the updated order
+            await userOrder.save();
+
+            return res.json({ message: "Product cancelled in the order", order: userOrder.order[orderIndex] });
+        } else {
+            return res.status(400).json({ message: "Product not found in the order" });
+        }
+    } catch (error) {
+        return res.status(400).json({ message: "Error Cancelling Order", Error: error.message });
+    }
+}
+
+
+
 
 module.exports = {
     userRegister,
@@ -848,6 +944,8 @@ module.exports = {
     updateUserProfile,
     showUserCart,
     createCheckOUtSession,
-    createOrder
+    createOrder,
+    getUserOrders,
+    cancelOrder
 };
 

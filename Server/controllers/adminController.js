@@ -10,7 +10,7 @@ const userModel = require('../models/User/userModel');
 const { Category, Product } = require('../models/Admin/productModel');
 const Offer = require('../models/Admin/offers')
 const bcrypt = require('bcrypt');
-
+const Order = require('../models/User/order')
 
 
 
@@ -583,7 +583,7 @@ const deleteOffer = async (req, res) => {
     if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
       return res.send('Unauthorized Person');
     }
-    
+
     const findProduct = await Product.findOne({ _id: id });
     if (!findProduct) {
       return res.status(400).json({ message: "Product Not Found" })
@@ -740,6 +740,66 @@ const getAllAdmins = async (req, res) => {
   }
 }
 
+const editOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params; // user ID
+    const { productID, adminID, paymentStatus, orderStatus } = req.body;
+    if (!adminID) {
+      return res.status(400).json({ message: "Enter Admin ID" });
+    }
+
+    if (!adminID) {
+      return res.status(400).json({ message: "Enter Admin ID" })
+    }
+    const admin = await userModel.findOne({ _id: adminID, isDeleted: false });
+    if (!admin) {
+      return res.status(400).json({ message: "Admin Not Exist" })
+    }
+
+    if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
+      return res.send('Unauthorized Person');
+    }
+
+    if (!productID) {
+      return res.status(400).json({ message: "Enter Product ID" });
+    }
+
+    if (!id) {
+      return res.status(400).json({ message: "Enter ID !!!" });
+    }
+
+    const userOrder = await Order.findOne({ userID: id });
+
+    if (!userOrder || userOrder.order.length === 0) {
+      return res.status(400).json({ message: "No Order Found" });
+    }
+
+    // Find the index of the product within the order
+    const orderIndex = userOrder.order.findIndex(order => order.productID == productID);
+
+    if (orderIndex !== -1) {
+      if (paymentStatus) {
+        userOrder.order[orderIndex].paymentStatus = paymentStatus;
+      }
+
+      if (orderStatus) {
+        userOrder.order[orderIndex].orderStatus = orderStatus;
+      }
+
+      // Save the updated order
+      await userOrder.save();
+
+      return res.json({ message: "Product cancelled in the order", order: userOrder.order[orderIndex] });
+    } else {
+      return res.status(400).json({ message: "Product not found in the order" });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Error Cancelling Order", Error: error.message });
+  }
+}
+
+
+
 module.exports = {
   imageController,
   showRegistedUsers,
@@ -764,4 +824,5 @@ module.exports = {
   createAdmin,
   deleteAdmin,
   getAllAdmins,
+  editOrderStatus,
 };

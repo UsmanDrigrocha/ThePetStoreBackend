@@ -11,7 +11,7 @@ require('./config/db')
 
 app.use(express.json());
 app.use(cors());
-app.use(express.urlencoded({extended : true}))
+app.use(express.urlencoded({ extended: true }))
 
 app.use(
   session({
@@ -46,3 +46,5 @@ app.get('/', (req, res) => {
 // admin.initializeApp({
 //   credential: admin.credential.cert(serviceAccount)
 // });
+
+
