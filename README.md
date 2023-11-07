@@ -9,15 +9,11 @@ Create your own .env file which contains
 PORT=
 JWT_SECRET_KEY=
 DB_VAR=
+STRIPE_SECRET_KEY=
 ```
 
 # To Run Server
 ```sh
 cd server
 node index.js
-```
-OR
-``` 
-npm i nodemon
-nodemon index.js 
 ```
