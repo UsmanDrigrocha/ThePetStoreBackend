@@ -12,6 +12,8 @@ const Offer = require('../models/Admin/offers')
 const bcrypt = require('bcrypt');
 const Order = require('../models/User/order')
 
+const saveNotificaton = require('../utils/saveNotification')
+
 
 
 //  ✅
@@ -487,6 +489,7 @@ const createOffer = async (req, res) => {
     await newOffer.save();
 
     const populatedOffer = await Offer.findById(newOffer._id).populate('productID');
+    const notification = await saveNotificaton(newOffer._id)
     res.status(200).json({ message: "Offer Created", Offer: populatedOffer });
   } catch (error) {
     console.log(error.message);
