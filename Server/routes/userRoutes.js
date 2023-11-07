@@ -61,7 +61,7 @@ route.post('/addToCart/:id', addToCart)
 route.post('/deleteCartItem/:id', deleteCartItem)
 route.post('/updateCartItem/:id', addToCart)
 route.post('/validateCoupon/:id', validateCoupon)
-route.get('/getUserCart/:id', validateToken, showUserCart)
+route.get('/getUserCart/:id', showUserCart)
 
 route.post('/createCheckOUtSession/:id', createCheckOUtSession)
 route.post("/createOrder/:id", createOrder)

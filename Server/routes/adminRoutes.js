@@ -59,4 +59,5 @@ route.get('/getAllAdmins/:id', getAllAdmins);
 
 route.post('/updateOrderStatus/:id',editOrderStatus)
 
+
 module.exports = route;

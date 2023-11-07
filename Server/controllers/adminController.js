@@ -768,6 +768,11 @@ const editOrderStatus = async (req, res) => {
       return res.status(400).json({ message: "Enter ID !!!" });
     }
 
+
+    const findUser = await userModel.findOne({ _id: id });
+    if (!findUser) {
+      return res.status(400).json({ message: "User Not Registered" })
+    }
     const userOrder = await Order.findOne({ userID: id });
 
     if (!userOrder || userOrder.order.length === 0) {
@@ -788,8 +793,8 @@ const editOrderStatus = async (req, res) => {
 
       // Save the updated order
       await userOrder.save();
-
-      return res.json({ message: "Product cancelled in the order", order: userOrder.order[orderIndex] });
+      // order: userOrder.order[orderIndex]
+      return res.json({ message: "Product cancelled in the order", userOrder });
     } else {
       return res.status(400).json({ message: "Product not found in the order" });
     }
