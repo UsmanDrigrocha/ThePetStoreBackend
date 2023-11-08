@@ -177,7 +177,7 @@ const userResetPassword = async (req, res) => {
 const verifyUserResetPassword = async (req, res) => {
     const { id, token } = req.params;
     try {
-        const user = await userModel.findById({ id, isDeleted: false });
+        const user = await userModel.findById({ _id: id, isDeleted: false });
         if (!user) {
             res.status(ResponseCodes.NOT_FOUND).json({ message: "Invalid ID" });
         }
@@ -192,7 +192,7 @@ const verifyUserResetPassword = async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error in reset password' });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error in reset password', Error: error.message });
     }
 }
 
@@ -838,7 +838,7 @@ const createOrder = async (req, res) => {
         }
 
         const userCart = await CartModel.findOne({ userID: id }).populate('cart.productID');
-        
+
         if (userCart.cart.length === 0) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User's cart is empty" });
         }
