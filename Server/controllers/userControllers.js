@@ -25,7 +25,7 @@ const userRegister = async (req, res) => {
         const { name, email, password } = req.body;  // Taking name , email , password from body
 
         if (!name || !email || !password) {
-            res.status(ResponseCodes.NO_CONTENT).json({ message: "Some field missing !!!" });
+            res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
         } else {
             const saltRounds = 10;
             bcrypt.genSalt(saltRounds, async function (err, salt) {
@@ -36,7 +36,7 @@ const userRegister = async (req, res) => {
                 bcrypt.hash(password, salt, async function (err, hashedPassword) {
                     if (err) {
                         console.error(err);
-                        return res.status(ResponseCodes.NO_CONTENT).json({ error: 'Enter Password !!!' });
+                        return res.status(ResponseCodes.NOT_FOUND).json({ error: 'Enter Password !!!' });
                     }
 
                     const newUser = new userModel({
@@ -75,7 +75,7 @@ const userLogin = async (req, res) => {
         const { email, password } = req.body;
         const user = await userModel.findOne({ email: email, isDeleted: false });
         if (!email || !password) { // if any field missing
-            res.status(ResponseCodes.NO_CONTENT).json({ message: "Some field missing !!!" });
+            res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
         }
         else {
             if (!user) { // if email doesn't exist in DB
@@ -165,7 +165,7 @@ const userResetPassword = async (req, res) => {
                 res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exist" });
             }
         } else {
-            res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Email !!!" })
+            res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Email !!!" })
         }
     } catch (error) {
         console.log(error.message);
@@ -179,7 +179,7 @@ const verifyUserResetPassword = async (req, res) => {
     try {
         const user = await userModel.findById({ id, isDeleted: false });
         if (!user) {
-            res.status(ResponseCodes.NO_CONTENT).json({ message: "Invalid ID" });
+            res.status(ResponseCodes.NOT_FOUND).json({ message: "Invalid ID" });
         }
         else {
             jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
@@ -220,7 +220,7 @@ const generateOTP = async (req, res) => {
     try {
         const { email } = req.body;
         if (!email) {
-            res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Email !!!" });
+            res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Email !!!" });
         } else {
             const user = await userModel.findOne({ email: email, isDeleted: false })
             if (user) {
@@ -265,7 +265,7 @@ const verifyOTP = async (req, res) => {
         const { email, enteredOTP } = req.body;
 
         if (!email || !enteredOTP) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "User ID and OTP are required." });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User ID and OTP are required." });
         }
 
         const otpUser = await userModel.findOne({ email: email, isDeleted: false });
@@ -341,7 +341,7 @@ const addUserProfile = async (req, res) => {
         const { image, addresses } = req.body;
 
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
 
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
@@ -377,7 +377,7 @@ const updateUserProfile = async (req, res) => {
         const { image } = req.body;
 
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
 
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
@@ -406,7 +406,7 @@ const addToWishlist = async (req, res) => {
         const { email } = req.body;
 
         if (!id || !email) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Please provide both ID and Email" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide both ID and Email" });
         }
 
         const findUser = await userModel.findOne({ email, isDeleted: false });
@@ -458,7 +458,7 @@ const deleteWishlist = async (req, res) => {
         const { email } = req.body;
 
         if (!id || !email) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Please provide both ID and Email" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide both ID and Email" });
         }
 
         const findUser = await userModel.findOne({ email, isDeleted: false });
@@ -500,7 +500,7 @@ const getUserWishlist = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter id" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter id" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
@@ -523,14 +523,14 @@ const addAddress = async (req, res) => {
         const { id } = req.params;
         const { addresses } = req.body;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Exist" })
         }
         if (!addresses) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Address" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Address" })
         }
 
         const findProfile = await userProfileModel.findOne({ userId: findUser._id });
@@ -550,7 +550,7 @@ const readAddresses = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
@@ -574,11 +574,11 @@ const updateUserAddresses = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" });
         }
         const { addresses } = req.body;
         if (!addresses) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Address" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Address" })
         }
         const findUser = await userModel.findOneAndUpdate({ _id: id, isDeleted: false }, {
             addresses
@@ -621,7 +621,7 @@ const deleteCartItem = async (req, res) => {
         const { quantity, email } = req.body;
 
         if (!email) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter All Fields" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter All Fields" });
         }
 
 
@@ -648,7 +648,7 @@ const deleteCartItem = async (req, res) => {
                 await userCart.save();
                 return res.json({ message: "Product removed from the cart" });
             } else {
-                res.status(ResponseCodes.NO_CONTENT).json({ message: "Cart is Empty" })
+                res.status(ResponseCodes.NOT_FOUND).json({ message: "Cart is Empty" })
             }
         }
     } catch (err) {
@@ -664,7 +664,7 @@ const addToCart = async (req, res) => {
         const { quantity, email } = req.body;
 
         if (!email || !quantity) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter All Fields" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter All Fields" });
         }
 
         if (quantity <= 0) {
@@ -731,7 +731,7 @@ const showUserCart = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
         const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
@@ -753,11 +753,11 @@ const validateCoupon = async (req, res) => {
     try {
         const enteredCouponCode = req.body.code;
         if (!enteredCouponCode) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Coupon Code" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Coupon Code" });
         }
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
         const findProduct = await Product.findOne({ _id: id });
         if (!findProduct) {
@@ -785,7 +785,7 @@ const createCheckOUtSession = async (req, res) => {
         const { products } = req.body;
 
         if (!products) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Products in req.body" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Products in req.body" });
         }
 
         const lineItems = [];
@@ -829,23 +829,23 @@ const createOrder = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID!" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID!" });
         }
 
         const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "User Not Exist!" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Exist!" });
         }
 
         const userCart = await CartModel.findOne({ userID: id }).populate('cart.productID');
-
+        
+        if (userCart.cart.length === 0) {
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User's cart is empty" });
+        }
         if (!userCart) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User's cart not found" });
         }
 
-        if (userCart.cart.length === 0) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "User's cart is empty" });
-        }
 
         let order = await Order.findOne({ userID: id });
 
@@ -890,7 +890,7 @@ const getUserOrders = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
         const user = await userModel.findOne({ _id: id, isDeleted: false })
         if (!user) {
@@ -909,11 +909,11 @@ const cancelOrder = async (req, res) => {
         const { productID } = req.body;
 
         if (!productID) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Product ID" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Product ID" });
         }
 
         if (!id) {
-            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID !!!" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID !!!" });
         }
 
         const userOrder = await Order.findOne({ userID: id });

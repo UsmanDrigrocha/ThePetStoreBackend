@@ -237,11 +237,11 @@ const deleteCategory = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" });
     }
     const { adminId } = req.body;
     if (!adminId) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
     const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
     if (!admin) {
@@ -264,7 +264,7 @@ const createProduct = async (req, res) => {
   try {
     const { name, price, description, size, quantity, animal, categoryID, coupon, images } = req.body;
     if (!name || !price || !description || !size || !quantity || !categoryID || !animal || !images) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter all Fields" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter all Fields" })
     } else {
       const objId = new mongoose.Types.ObjectId(categoryID);
       const existingCategory = await Category.findById(objId);
@@ -274,7 +274,7 @@ const createProduct = async (req, res) => {
 
       const { adminId } = req.body;
       if (!adminId) {
-        return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" })
+        return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
       }
       const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
       if (!admin) {
@@ -368,11 +368,11 @@ const UpdateProduct = async (req, res) => {
     const { name, price, description, size, quantity, animal, categoryID, coupon, images } = req.body;
     const findProduct = await Product.findOne({ _id: id });
     if (!findProduct) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Product Not Found" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Found" })
     }
     const { adminId } = req.body;
     if (!adminId) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
     const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
     if (!admin) {
@@ -422,11 +422,11 @@ const deleteProduct = async (req, res) => {
     const { id } = req.params;
     const { adminId } = req.body;
     if (!adminId) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
     const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
     if (!admin) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Admin Not Exist" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Admin Not Exist" })
     }
     if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
       return res.send('Unauthorized Person');
@@ -446,16 +446,16 @@ const createOffer = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Product ID" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Product ID" });
     }
 
     const { adminId } = req.body;
     if (!adminId) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
     const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
     if (!admin) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Admin Not Exist" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Admin Not Exist" })
     }
     if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
       return res.send('Unauthorized Person');
@@ -463,7 +463,7 @@ const createOffer = async (req, res) => {
 
     const { discountPercentage, expirationDate } = req.body;
     if (!discountPercentage || !expirationDate) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter All Fields" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter All Fields" });
     }
     if (discountPercentage <= 0) {
       return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Minimum Discount should be greater than 0" });
@@ -528,11 +528,11 @@ const updateOffer = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID !" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID !" });
     }
     const { adminId } = req.body;
     if (!adminId) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
     const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
     if (!admin) {
@@ -576,12 +576,12 @@ const deleteOffer = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID !" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID !" });
     }
 
     const { adminId } = req.body;
     if (!adminId) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
     const admin = await userModel.findOne({ _id: adminId, isDeleted: false });
     if (!admin) {
@@ -641,7 +641,7 @@ const createAdmin = async (req, res) => {
       return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Unauthorized" })
     }
     if (!name || !email || !password || !role || !id) {
-      res.status(ResponseCodes.NO_CONTENT).json({ message: "Some field missing !!!" });
+      res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
     } else {
       const saltRounds = 10;
       bcrypt.genSalt(saltRounds, async function (err, salt) {
@@ -691,7 +691,7 @@ const deleteAdmin = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
     }
     const superAdmin = await userModel.findOne({ _id: id, isDeleted: false });
     if (!superAdmin) {
@@ -702,7 +702,7 @@ const deleteAdmin = async (req, res) => {
     }
     const { email } = req.body;
     if (!email) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Email" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Email" });
     }
     const admin = await userModel.findOne({ email, isDeleted: false });
     if (!admin) {
@@ -724,7 +724,7 @@ const getAllAdmins = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
     }
     const superAdmin = await userModel.findOne({ _id: id, isDeleted: false });
     if (!superAdmin) {
@@ -752,7 +752,7 @@ const editOrderStatus = async (req, res) => {
     const { id } = req.params; // user ID
     const { productID, adminID, paymentStatus, orderStatus } = req.body;
     if (!adminID) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Admin ID" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" });
     }
     const admin = await userModel.findOne({ _id: adminID, isDeleted: false });
     if (!admin) {
@@ -764,11 +764,11 @@ const editOrderStatus = async (req, res) => {
     }
 
     if (!productID) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Product ID" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Product ID" });
     }
 
     if (!id) {
-      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID !!!" });
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID !!!" });
     }
 
 
@@ -797,7 +797,7 @@ const editOrderStatus = async (req, res) => {
       // Save the updated order
       await userOrder.save();
       // order: userOrder.order[orderIndex]
-      return res.json({ message: "Product cancelled in the order", userOrder });
+      return res.json({ message: "Product order Updated", userOrder });
     } else {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product not found in the order" });
     }
