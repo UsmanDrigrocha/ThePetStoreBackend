@@ -606,7 +606,7 @@ const updateUserAddresses = async (req, res) => {
 const newArrivals = async (req, res) => {
     try {
         const daysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
-        const newArrivals = await Product.find({ date: { $gte: daysAgo } }).exec();
+        const newArrivals = await Product.find({ createdAt: { $gte: daysAgo } }).exec();
         res.status(ResponseCodes.SUCCESS).json({ message: "New Arrivals Found", NewArrivals: newArrivals })
     } catch (err) {
         console.error(err.message);
