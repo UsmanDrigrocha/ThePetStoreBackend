@@ -48,7 +48,7 @@ route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
 route.post('/createProfile/:id', validateToken, addUserProfile) // Create User Profile Image
 route.post('/updateProfile/:id', validateToken, updateUserProfile) // Update User Profile Image
 route.get('/getAllCategories', validateToken, getProductCategories)
-route.post('/uploadImage', validateToken, uploadImage)
+route.post('/uploadImage',  uploadImage)
 route.post('/addToWishlist/:id', validateToken, addToWishlist)
 route.post('/removeFromWishlist/:id', validateToken, deleteWishlist)
 route.get('/getUserWishlist/:id', validateToken, getUserWishlist)

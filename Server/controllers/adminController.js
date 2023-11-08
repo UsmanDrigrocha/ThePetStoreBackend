@@ -698,7 +698,7 @@ const deleteAdmin = async (req, res) => {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Not Registered !" })
     }
     if (!superAdmin.role === 'Super Admin') {
-      return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Unauthorized" })
+      return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Unauthorized to Perform Action" })
     }
     const { email } = req.body;
     if (!email) {
@@ -713,7 +713,7 @@ const deleteAdmin = async (req, res) => {
     }
 
     admin.isDeleted = true;
-    admin.save();
+    await admin.save();
     res.status(ResponseCodes.SUCCESS).json({ message: "Admin Delted Successfully" });
   } catch (error) {
     res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error " })
