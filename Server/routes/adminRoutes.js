@@ -33,31 +33,31 @@ const {
 const { validateAdmin } = require('../middlewares/validateAdmin');
 
 
-route.post('/adminLogin', adminLogin);
-route.post('/uploadBannerImage', imageController);
-route.get('/getBannerImg', showBannerImg);
-route.get('/getRegistedUsers', showRegistedUsers);
-route.post('/createCatagory/:id', createCategory)//
-route.get('/getProductCategories', getProductCategories);
-route.get('/getOneCategory/:id', readOneCategory)
-route.put('/updateCategory/:id', updateCategory);
-route.get('/getChildCategories/:id', getChildCategories);
-route.delete('/deleteCategory/:id', deleteCategory);
-route.post('/createProduct', createProduct);
-route.get('/getAllProducts', getAllProducts);
-route.get('/getProductsByCategories/:id', getProductsByCategories);
-route.get('/getOneProduct/:id', getOneProduct);
-route.put('/updateProduct/:id', UpdateProduct);
-route.delete('/deleteProduct/:id', deleteProduct);
-route.post('/createOffer/:id', createOffer);
-route.get('/getAllOffers', readOffers);
-route.post('/updateOffer/:id', updateOffer);
-route.delete('/deleteOffer/:id', deleteOffer);
-route.post('/createAdmin/:id', createAdmin);
-route.delete('/deleteAdmin/:id', deleteAdmin);
-route.get('/getAllAdmins/:id', getAllAdmins);
+route.post('/adminLogin', validateAdmin, adminLogin);
+route.post('/uploadBannerImage', validateAdmin, imageController);
+route.get('/getBannerImg', validateAdmin, showBannerImg);
+route.get('/getRegistedUsers', validateAdmin, showRegistedUsers);
+route.post('/createCatagory/:id', validateAdmin, createCategory)//
+route.get('/getProductCategories', validateAdmin, getProductCategories);
+route.get('/getOneCategory/:id', validateAdmin, readOneCategory)
+route.put('/updateCategory/:id', validateAdmin, updateCategory);
+route.get('/getChildCategories/:id', validateAdmin, getChildCategories);
+route.delete('/deleteCategory/:id', validateAdmin, deleteCategory);
+route.post('/createProduct', validateAdmin, createProduct);
+route.get('/getAllProducts', validateAdmin, getAllProducts);
+route.get('/getProductsByCategories/:id', validateAdmin, getProductsByCategories);
+route.get('/getOneProduct/:id', validateAdmin, getOneProduct);
+route.put('/updateProduct/:id', validateAdmin, UpdateProduct);
+route.delete('/deleteProduct/:id', validateAdmin, deleteProduct);
+route.post('/createOffer/:id', validateAdmin, createOffer);
+route.get('/getAllOffers', validateAdmin, readOffers);
+route.post('/updateOffer/:id', validateAdmin, updateOffer);
+route.delete('/deleteOffer/:id', validateAdmin, deleteOffer);
+route.post('/createAdmin/:id', validateAdmin, createAdmin);
+route.delete('/deleteAdmin/:id', validateAdmin, deleteAdmin);
+route.get('/getAllAdmins/:id', validateAdmin, getAllAdmins);
 
-route.post('/updateOrderStatus/:id',editOrderStatus)
+route.post('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
 
 
 module.exports = route;
