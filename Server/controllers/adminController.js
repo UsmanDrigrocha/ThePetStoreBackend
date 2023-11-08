@@ -691,7 +691,7 @@ const deleteAdmin = async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ message: "Enter ID" })
+      return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
     }
     const superAdmin = await userModel.findOne({ _id: id, isDeleted: false });
     if (!superAdmin) {

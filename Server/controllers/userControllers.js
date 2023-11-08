@@ -15,6 +15,7 @@ const CartModel = require('../models/User/cartModel');
 const WishlistModel = require('../models/User/WishlistModel');
 const Order = require('../models/User/order')
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const ResponseCodes = require('../utils/methods/response')
 
 const mongoose = require('mongoose')
 
@@ -24,18 +25,18 @@ const userRegister = async (req, res) => {
         const { name, email, password } = req.body;  // Taking name , email , password from body
 
         if (!name || !email || !password) {
-            res.status(400).json({ message: "Some field missing !!!" });
+            res.status(ResponseCodes.NO_CONTENT).json({ message: "Some field missing !!!" });
         } else {
             const saltRounds = 10;
             bcrypt.genSalt(saltRounds, async function (err, salt) {
                 if (err) {
                     console.error(err);
-                    return res.status(500).json({ error: 'Error generating salt' });
+                    return res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ error: 'Error generating salt' });
                 }
                 bcrypt.hash(password, salt, async function (err, hashedPassword) {
                     if (err) {
                         console.error(err);
-                        return res.status(500).json({ error: 'Enter Password !!!' });
+                        return res.status(ResponseCodes.NO_CONTENT).json({ error: 'Enter Password !!!' });
                     }
 
                     const newUser = new userModel({
@@ -51,20 +52,20 @@ const userRegister = async (req, res) => {
                         const existingUser = await userModel.findOne({ email: email, isDeleted: false });
 
                         if (existingUser) {
-                            res.status(409).json({ message: "Email Already Exists" });
+                            res.status(ResponseCodes.CONFLICT).json({ message: "Email Already Exists" });
                         } else {
                             await newUser.save();
                             const token = jwt.sign({ userID: newUser.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
-                            res.status(201).json({ message: "User Registered Successfully", token: token, user: newUser });
+                            res.status(ResponseCodes.CREATED).json({ message: "User Registered Successfully", token: token, user: newUser });
                         }
                     } catch (error) {
-                        res.status(500).json({ message: "Error saving user", error: error.message });
+                        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error saving user", error: error.message });
                     }
                 });
             });
         }
     } catch (error) {
-        res.status(400).json({ message: "Error", error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error", error: error.message });
     }
 }
 
@@ -74,14 +75,14 @@ const userLogin = async (req, res) => {
         const { email, password } = req.body;
         const user = await userModel.findOne({ email: email, isDeleted: false });
         if (!email || !password) { // if any field missing
-            res.status(400).json({ message: "Some field missing !!!" });
+            res.status(ResponseCodes.NO_CONTENT).json({ message: "Some field missing !!!" });
         }
         else {
             if (!user) { // if email doesn't exist in DB
-                res.status(401).json({ message: "User Doesn't Exists" });
+                res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exists" });
             } else {
                 if (!user.isActive === true) {
-                    return res.status(400).json({ message: "Verify first" })
+                    return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Verify first" })
                 }
                 const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
                 bcrypt.compare(password, user.password, function (err, result) {
@@ -89,15 +90,15 @@ const userLogin = async (req, res) => {
 
                     if (result) { //if password is correct
                         req.session.token = token;
-                        res.status(202).json({ message: "User Logged In successfully", token: token });
+                        res.status(ResponseCodes.SUCCESS).json({ message: "User Logged In successfully", token: token });
                     } else { // if wrong password
-                        res.status(401).json({ message: "Wrong Password" });
+                        res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Wrong Password" });
                     }
                 });
             }
         }
     } catch (error) {
-        res.status(400).json({ message: "Error while login", error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error while login", error: error.message });
     }
 };
 
@@ -108,7 +109,7 @@ const userChangePassword = async (req, res) => {
         if (email && password) {
             const existingUser = await userModel.findOne({ email: email, isDeleted: false });
             if (!existingUser) {
-                res.status(400).json({ message: "User Doesn't exist" })
+                res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't exist" })
             } else {
                 try {
                     const saltRounds = 9;
@@ -118,24 +119,24 @@ const userChangePassword = async (req, res) => {
                     const hashedPassword = await bcrypt.hash(password, salt);
 
                     if (!existingUser) {
-                        return res.status(404).json({ message: "User not found" });
+                        return res.status(ResponseCodes.NOT_FOUND).json({ message: "User not found" });
                     }
 
                     existingUser.password = hashedPassword;
                     await existingUser.save();
 
-                    res.status(200).json({ message: "Password reset successful" });
+                    res.status(ResponseCodes.SUCCESS).json({ message: "Password reset successful" });
                 } catch (error) {
                     console.error(error);
-                    res.status(500).json({ message: "Password reset failed", error: error.message });
+                    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Password reset failed", error: error.message });
                 }
             }
         }
         else {
-            res.status(200).json({ message: "Enter All Fields !!!" })
+            res.status(ResponseCodes.SUCCESS).json({ message: "Enter All Fields !!!" })
         }
     } catch (error) {
-        res.status(400).json({ message: "Error Forgetting user password", error: error.message })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Forgetting user password", error: error.message })
     }
 
 }
@@ -156,19 +157,19 @@ const userResetPassword = async (req, res) => {
                 const mailText = 'Reset Password Link Email'
                 const emailSent = await mail(recipientEmail, emailSubject, mailText, emailHTMLBody);
                 if (emailSent) {
-                    res.status(200).json({ message: 'Reset Link sent successfully' });
+                    res.status(ResponseCodes.SUCCESS).json({ message: 'Reset Link sent successfully' });
                 } else {
-                    res.status(500).json({ message: 'Reset Link Email Sending Failed !!' });
+                    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Reset Link Email Sending Failed !!' });
                 }
             } else {
-                res.status(400).json({ message: "User Doesn't Exist" });
+                res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exist" });
             }
         } else {
-            res.status(400).json({ message: "Enter Email !!!" })
+            res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Email !!!" })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(400).json({ message: "Error in User Forget Password" });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error in User Forget Password" });
     }
 }
 
@@ -178,20 +179,20 @@ const verifyUserResetPassword = async (req, res) => {
     try {
         const user = await userModel.findById({ id, isDeleted: false });
         if (!user) {
-            res.status(400).json({ message: "Invalid ID" });
+            res.status(ResponseCodes.NO_CONTENT).json({ message: "Invalid ID" });
         }
         else {
             jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
                 if (err) {
-                    res.status(400).json({ message: 'Invalid or expired token' });
+                    res.status(ResponseCodes.UNAUTHORIZED).json({ message: 'Invalid or expired token' });
                 } else {
-                    res.status(200).json({ message: "Reset Link Verified" });
+                    res.status(ResponseCodes.SUCCESS).json({ message: "Reset Link Verified" });
                 }
             });
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ message: 'Error in reset password' });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error in reset password' });
     }
 }
 
@@ -207,10 +208,10 @@ const showBannerImg = async (req, res) => {
         // });
 
         // Respond with the data in an HTTP response
-        res.status(200).json(data);
+        res.status(ResponseCodes.SUCCESS).json(data);
     } catch (error) {
         console.error('Error retrieving data:', error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
     }
 };
 
@@ -219,7 +220,7 @@ const generateOTP = async (req, res) => {
     try {
         const { email } = req.body;
         if (!email) {
-            res.status(400).json({ message: "Enter Email !!!" });
+            res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Email !!!" });
         } else {
             const user = await userModel.findOne({ email: email, isDeleted: false })
             if (user) {
@@ -243,18 +244,18 @@ const generateOTP = async (req, res) => {
                 const emailSent = await mail(recipientEmail, emailSubject, mailText, emailHTMLBody);
 
                 if (emailSent) {
-                    res.status(200).json({ message: 'OTP Email sent successfully', Email: recipientEmail });
+                    res.status(ResponseCodes.SUCCESS).json({ message: 'OTP Email sent successfully', Email: recipientEmail });
                     await newUser.save()
                 } else {
-                    res.status(500).json({ message: 'Email sending failed' });
+                    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Email sending failed' });
                 }
             } else {
-                res.status(400).json({ message: "User Not Registered" });
+                res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Registered" });
             }
         }
     } catch (error) {
         console.log(error.message)
-        res.status(400).json({ message: "Error in generating otp", error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error in generating otp", error: error.message });
     }
 };
 
@@ -264,7 +265,7 @@ const verifyOTP = async (req, res) => {
         const { email, enteredOTP } = req.body;
 
         if (!email || !enteredOTP) {
-            return res.status(400).json({ message: "User ID and OTP are required." });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "User ID and OTP are required." });
         }
 
         const otpUser = await userModel.findOne({ email: email, isDeleted: false });
@@ -275,19 +276,19 @@ const verifyOTP = async (req, res) => {
                 if (otpUser.otpExpiredAt >= currentTime) {
                     otpUser.isActive = true;
                     otpUser.save();
-                    res.status(200).json({ message: "OTP Verified Successfully" });
+                    res.status(ResponseCodes.SUCCESS).json({ message: "OTP Verified Successfully" });
                 } else {
-                    res.status(400).json({ message: "Invalid OTP" }); // expired
+                    res.status(ResponseCodes.BAD_REQUEST).json({ message: "Invalid OTP" }); // expired
                 }
             } else {
-                res.status(400).json({ message: "Invalid OTP" }); // wrong otp
+                res.status(ResponseCodes.BAD_REQUEST).json({ message: "Invalid OTP" }); // wrong otp
             }
         }
         else {
-            res.status(400).json({ message: "User Not Found." });
+            res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Found." });
         }
     } catch (error) {
-        res.status(400).json({ message: "Error in verifying OTP", error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error in verifying OTP", error: error.message });
     }
 };
 
@@ -319,17 +320,17 @@ const uploadImage = async (req, res) => {
     try {
         uplod.single('image')(req, res, (err) => {
             if (!req?.file) {
-                return res.status(200).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
+                return res.status(ResponseCodes.METHOD_NOT_ALLOWED).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
             }
 
             const fileType = req.file.mimetype;
             const fileName = req.file.filename;
             const fileURL = `${fileName}`;
 
-            res.status(200).json({ message: "Image Uploaded to Server", url: fileURL })
+            res.status(ResponseCodes.SUCCESS).json({ message: "Image Uploaded to Server", url: fileURL })
         });
     } catch (error) {
-        res.status(400).json({ message: "Error Uploading User Profile" })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Uploading User Profile" })
     }
 }
 
@@ -340,21 +341,21 @@ const addUserProfile = async (req, res) => {
         const { image, addresses } = req.body;
 
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
         }
 
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
-            return res.status(400).json({ message: "User Not Registered" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Registered" })
         }
 
         if (!image) {
-            return res.status(200).json({ message: "Enter All Fields" })
+            return res.status(ResponseCodes.SUCCESS).json({ message: "Enter All Fields" })
         }
 
         const findProfile = await userProfileModel.findOne({ userId: findUser._id })
         if (findProfile) {
-            return res.status(400).json({ message: "Profile Already Exist" });
+            return res.status(ResponseCodes.CONFLICT).json({ message: "Profile Already Exist" });
         }
 
         const userProfile = new userProfileModel({
@@ -363,9 +364,9 @@ const addUserProfile = async (req, res) => {
             userId: findUser._id,
         })
         await userProfile.save();
-        res.status(200).json({ message: "User Profile updated", userProfile });
+        res.status(ResponseCodes.SUCCESS).json({ message: "User Profile updated", userProfile });
     } catch (error) {
-        res.status(500).json({ message: "Error Creating user profile", error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Creating user profile", error: error.message });
     }
 }
 
@@ -376,25 +377,25 @@ const updateUserProfile = async (req, res) => {
         const { image } = req.body;
 
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
         }
 
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
-            return res.status(400).json({ message: "User Not Registered" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Registered" })
         }
 
         const findProfile = await userProfileModel.findOne({ userId: findUser._id });
         if (!findProfile) {
-            return res.status(400).json({ message: "Profile Not Exist" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Profile Not Exist" });
         }
         if (image) {
             findProfile.profileImage = image;
         }
         await findProfile.save();
-        res.status(200).json({ message: "User Profile updated", findProfile });
+        res.status(ResponseCodes.SUCCESS).json({ message: "User Profile updated", findProfile });
     } catch (error) {
-        res.status(500).json({ message: "Error updating user profile", error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error updating user profile", error: error.message });
     }
 }
 
@@ -405,19 +406,19 @@ const addToWishlist = async (req, res) => {
         const { email } = req.body;
 
         if (!id || !email) {
-            return res.status(400).json({ message: "Please provide both ID and Email" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Please provide both ID and Email" });
         }
 
         const findUser = await userModel.findOne({ email, isDeleted: false });
 
         if (!findUser) {
-            return res.status(400).json({ message: "User with this email is not registered" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User with this email is not registered" });
         }
 
         const findProduct = await Product.findOne({ _id: id });
 
         if (!findProduct) {
-            return res.status(400).json({ message: "Product not found" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product not found" });
         }
 
         const wishlist = await WishlistModel.findOne({ userID: findUser._id })
@@ -429,7 +430,7 @@ const addToWishlist = async (req, res) => {
                 userID: findUser._id
             });
             await newWishlist.save();
-            return res.status(201).json({ message: "Product Added To Wishlist", Product: newWishlist });
+            return res.status(ResponseCodes.CREATED).json({ message: "Product Added To Wishlist", Product: newWishlist });
         } else {
             const userWishlist = await WishlistModel.findOne({ userID: findUser._id });
             const wishlistItem = userWishlist.wishlist.find(item => item.productID == id);
@@ -438,15 +439,15 @@ const addToWishlist = async (req, res) => {
                     productID: id,
                 });
                 await userWishlist.save();
-                return res.status(200).json({ message: 'Product Added to Wishlist', Wishlist: userWishlist });
+                return res.status(ResponseCodes.SUCCESS).json({ message: 'Product Added to Wishlist', Wishlist: userWishlist });
             }
             else {
-                res.status(400).json({ message: "Product Already Exist in Wishlist" })
+                res.status(ResponseCodes.CONFLICT).json({ message: "Product Already Exist in Wishlist" })
             }
         }
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: "Error adding to wishlist" });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error adding to wishlist" });
     }
 };
 
@@ -457,38 +458,38 @@ const deleteWishlist = async (req, res) => {
         const { email } = req.body;
 
         if (!id || !email) {
-            return res.status(400).json({ message: "Please provide both ID and Email" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Please provide both ID and Email" });
         }
 
         const findUser = await userModel.findOne({ email, isDeleted: false });
 
         if (!findUser) {
-            return res.status(400).json({ message: "User with this email is not registered" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User with this email is not registered" });
         }
 
         const findProduct = await Product.findOne({ _id: id });
 
         if (!findProduct) {
-            return res.status(400).json({ message: "Product not found" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product not found" });
         }
 
 
         const userWishlist = await WishlistModel.findOne({ userID: findUser._id });
         const wishlistItem = userWishlist.wishlist.find(item => item.productID == id);
         if (!wishlistItem) {
-            res.status(400).json({ message: "Product Not Exist in Wishlist" })
+            res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Exist in Wishlist" })
         }
         else {
             userWishlist.wishlist.pop({
                 productID: id,
             });
             await userWishlist.save();
-            return res.status(200).json({ message: 'Product Removed from Wishlist', Wishlist: userWishlist });
+            return res.status(ResponseCodes.SUCCESS).json({ message: 'Product Removed from Wishlist', Wishlist: userWishlist });
         }
 
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: "Error adding to wishlist" });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error adding to wishlist" });
     }
 
 
@@ -499,20 +500,20 @@ const getUserWishlist = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter id" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter id" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
-            return res.status(400).json({ message: "ID not registered" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "ID not registered" });
         }
         const wishlist = await WishlistModel.findOne({ userID: findUser._id }).populate('wishlist.productID');
         if (!wishlist || !Array.isArray(wishlist.wishlist) || wishlist.wishlist.length === 0) {
-            return res.status(400).json({ message: "Your Wishlist is Empty" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Your Wishlist is Empty" });
         }
-        res.status(200).json({ message: "Wishlist", wishlist: wishlist });
+        res.status(ResponseCodes.SUCCESS).json({ message: "Wishlist", wishlist: wishlist });
     }
     catch (error) {
-        res.status(400).json({ message: "Error Getting Wishlist", Error: error.message })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Getting Wishlist", Error: error.message })
     }
 }
 
@@ -522,14 +523,14 @@ const addAddress = async (req, res) => {
         const { id } = req.params;
         const { addresses } = req.body;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
-            return res.status(400).json({ message: "User Not Exist" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Exist" })
         }
         if (!addresses) {
-            return res.status(400).json({ message: "Enter Address" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Address" })
         }
 
         const findProfile = await userProfileModel.findOne({ userId: findUser._id });
@@ -537,9 +538,9 @@ const addAddress = async (req, res) => {
         findProfile.addresses = addresses;
 
         await findProfile.save();
-        res.status(200).json({ message: "Address Added", Addresses: findProfile.addresses })
+        res.status(ResponseCodes.SUCCESS).json({ message: "Address Added", Addresses: findProfile.addresses })
     } catch (error) {
-        res.status(400).json({ message: "Error Adding Addresses" })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Adding Addresses" })
     }
 }
 
@@ -549,22 +550,22 @@ const readAddresses = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
-            return res.status(400).json({ message: "User Doesn't Exist" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exist" })
         }
 
         const findAddresses = await userProfileModel.findOne({ userId: _id });
         if (!findAddresses) {
-            return res.status(400).json({ message: "User " })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Addresses Don't Exist " })
         }
 
         const data = findUser.addresses;
-        res.status(200).json({ Addresses: data })
+        res.status(ResponseCodes.SUCCESS).json({ Addresses: data })
     } catch (error) {
-        res.status(400).json({ message: "Error Reading Addresses" })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Reading Addresses" })
     }
 }
 
@@ -573,18 +574,18 @@ const updateUserAddresses = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" });
         }
         const { addresses } = req.body;
         if (!addresses) {
-            return res.status(400).json({ message: "Enter Address" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Address" })
         }
         const findUser = await userModel.findOneAndUpdate({ _id: id, isDeleted: false }, {
             addresses
         });
 
         if (!findUser) {
-            return res.status(400).json({ message: "User Not Registered" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Registered" });
         }
         const findProfile = await userProfileModel.findOne({ userId: id })
         if (!findProfile) {
@@ -594,10 +595,10 @@ const updateUserAddresses = async (req, res) => {
         } else {
             findProfile.addresses = addresses;
             findProfile.save();
-            res.status(400).json({ message: "User Addresses Updated", findProfile })
+            res.status(ResponseCodes.SUCCESS).json({ message: "User Addresses Updated", findProfile })
         }
     } catch (error) {
-        res.status(400).json({ message: "Error Updating Addresses" })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Updating Addresses" })
     }
 }
 
@@ -606,10 +607,10 @@ const newArrivals = async (req, res) => {
     try {
         const daysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
         const newArrivals = await Product.find({ date: { $gte: daysAgo } }).exec();
-        res.status(200).json({ message: "New Arrivals Found", NewArrivals: newArrivals })
+        res.status(ResponseCodes.SUCCESS).json({ message: "New Arrivals Found", NewArrivals: newArrivals })
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: 'Error Getting New Arrivals' });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ error: 'Error Getting New Arrivals' });
     }
 };
 
@@ -620,24 +621,24 @@ const deleteCartItem = async (req, res) => {
         const { quantity, email } = req.body;
 
         if (!email) {
-            return res.status(400).json({ message: "Enter All Fields" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter All Fields" });
         }
 
 
         const user = await userModel.findOne({ email, isDeleted: false });
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(ResponseCodes.NOT_FOUND).json({ error: 'User not found' });
         }
 
         const findProduct = await Product.findOne({ _id: id });
 
         if (!findProduct) {
-            return res.status(400).json({ message: "Product Not Found" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Found" });
         }
         const userCart = await CartModel.findOne({ userID: user._id });
         if (!userCart) {
-            return res.status(400).json({ message: "Create Your Cart !" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Create Your Cart !" })
         }
         else {
             const cartItemIndex = userCart.cart.findIndex(item => item.productID == id);
@@ -647,11 +648,11 @@ const deleteCartItem = async (req, res) => {
                 await userCart.save();
                 return res.json({ message: "Product removed from the cart" });
             } else {
-                res.status(400).json({ message: "Cart is Empty" })
+                res.status(ResponseCodes.NO_CONTENT).json({ message: "Cart is Empty" })
             }
         }
     } catch (err) {
-        return res.status(500).json({ error: 'Error in Deleting Cart' });
+        return res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ error: 'Error in Deleting Cart' });
     }
 };
 
@@ -663,23 +664,23 @@ const addToCart = async (req, res) => {
         const { quantity, email } = req.body;
 
         if (!email || !quantity) {
-            return res.status(400).json({ message: "Enter All Fields" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter All Fields" });
         }
 
         if (quantity <= 0) {
-            return res.status(400).json({ error: 'Invalid quantity' });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ error: 'Invalid quantity' });
         }
 
         const user = await userModel.findOne({ email, isDeleted: false });
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(ResponseCodes.NOT_FOUND).json({ error: 'User not found' });
         }
 
         const findProduct = await Product.findOne({ _id: id });
 
         if (!findProduct) {
-            return res.status(400).json({ message: "Product Not Found" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Found" });
         }
 
         const userCart = await CartModel.findOne({ userID: user._id });
@@ -695,10 +696,10 @@ const addToCart = async (req, res) => {
                 userID: user._id
             });
             await newCart.save();
-            return res.status(200).json({ message: 'Product added to cart', cart: newCart });
+            return res.status(ResponseCodes.SUCCESS).json({ message: 'Product added to cart', cart: newCart });
         } else {
             if (quantity > findProduct.quantity) {
-                return res.status(400).json({ message: "This Quantity is not available in Stock" });
+                return res.status(ResponseCodes.NOT_FOUND).json({ message: "This Quantity is not available in Stock" });
             }
 
             let totalPrice = findProduct.price * quantity;
@@ -717,10 +718,10 @@ const addToCart = async (req, res) => {
             }
 
             await userCart.save();
-            return res.status(200).json({ message: 'Cart item quantity updated', cart: userCart });
+            return res.status(ResponseCodes.SUCCESS).json({ message: 'Cart item quantity updated', cart: userCart });
         }
     } catch (err) {
-        return res.status(500).json({ error: 'Error in Cart' });
+        return res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ error: 'Error in Cart' });
     }
 };
 
@@ -730,20 +731,20 @@ const showUserCart = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
         }
         const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
-            return res.status(400).json({ message: "User Not Registered" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Registered" });
         }
         const userCart = await CartModel.findOne({ userID: user._id }).populate('cart.productID');
         if (!userCart) {
-            return res.status(400).json({ message: "User Don't Have Cart" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Don't Have Cart" })
         }
         const data = userCart.cart;
-        res.status(200).json({ message: "Getting User Cart", data });
+        res.status(ResponseCodes.CREATED).json({ message: "Getting User Cart", data });
     } catch (error) {
-        res.status(400).json({ message: "Error Getting User Cart", Error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Getting User Cart", Error: error.message });
     }
 }
 
@@ -752,15 +753,15 @@ const validateCoupon = async (req, res) => {
     try {
         const enteredCouponCode = req.body.code;
         if (!enteredCouponCode) {
-            return res.status(400).json({ message: "Enter Coupon Code" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Coupon Code" });
         }
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
         }
         const findProduct = await Product.findOne({ _id: id });
         if (!findProduct) {
-            return res.status(400).json({ message: "Product Not found" })
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not found" })
         }
         const productCouponCode = findProduct.coupon.code;
         const couponExpirationDate = findProduct.coupon.expirationDate;
@@ -772,10 +773,10 @@ const validateCoupon = async (req, res) => {
             var discountedPrice = productPrice - discount;
             return res.json({ message: "Coupon Verified", priceAfterDiscount: discountedPrice, oldPrice: productPrice })
         }
-        res.status(400).json({ message: "Invalid / Expired Coupon" })
+        res.status(ResponseCodes.BAD_REQUEST).json({ message: "Invalid / Expired Coupon" })
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error validating product coupon" });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error validating product coupon" });
     }
 }
 
@@ -784,7 +785,7 @@ const createCheckOUtSession = async (req, res) => {
         const { products } = req.body;
 
         if (!products) {
-            return res.status(400).json({ message: "Enter Products in req.body" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Products in req.body" });
         }
 
         const lineItems = [];
@@ -792,7 +793,7 @@ const createCheckOUtSession = async (req, res) => {
             const productData = await Product.findById(product._id);
 
             if (!productData) {
-                return res.status(400).json({ message: "Product not found" });
+                return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product not found" });
             }
 
             lineItems.push({
@@ -816,10 +817,10 @@ const createCheckOUtSession = async (req, res) => {
             cancel_url: "https://your-cancel-url.com", // Replace with your cancel URL
         });
 
-        res.status(200).json({ message: "Stripe Session ID Created !", ID: session.id });
+        res.status(ResponseCodes.CREATED).json({ message: "Stripe Session ID Created !", ID: session.id });
     } catch (error) {
         console.error(error);
-        res.status(400).json({ message: "Error creating checkout session" });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error creating checkout session" });
     }
 }
 
@@ -828,22 +829,22 @@ const createOrder = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID!" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID!" });
         }
 
         const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
-            return res.status(400).json({ message: "User Not Exist!" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "User Not Exist!" });
         }
 
         const userCart = await CartModel.findOne({ userID: id }).populate('cart.productID');
 
         if (!userCart) {
-            return res.status(400).json({ message: "User's cart not found" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User's cart not found" });
         }
 
         if (userCart.cart.length === 0) {
-            return res.status(400).json({ message: "User's cart is empty" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "User's cart is empty" });
         }
 
         let order = await Order.findOne({ userID: id });
@@ -879,9 +880,9 @@ const createOrder = async (req, res) => {
 
         await userCart.save();
 
-        res.status(200).json({ message: "Order Created!", order });
+        res.status(ResponseCodes.CREATED).json({ message: "Order Created!", order });
     } catch (error) {
-        res.status(400).json({ message: "Error Creating Order", Error: error.message });
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Creating Order", Error: error.message });
     }
 }
 
@@ -889,16 +890,16 @@ const getUserOrders = async (req, res) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID" })
         }
         const user = await userModel.findOne({ _id: id, isDeleted: false })
         if (!user) {
-            return res.status(400).json({ message: "User Not Found" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Found" });
         }
         const userOrders = await Order.findOne({ userID: id });
-        res.status(200).json({ message: "User Orders Found", userOrders })
+        res.status(ResponseCodes.SUCCESS).json({ message: "User Orders Found", userOrders })
     } catch (error) {
-        res.status(400).json({ message: "Error Getting User's Orders" })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Getting User's Orders" })
     }
 }
 
@@ -908,17 +909,17 @@ const cancelOrder = async (req, res) => {
         const { productID } = req.body;
 
         if (!productID) {
-            return res.status(400).json({ message: "Enter Product ID" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter Product ID" });
         }
 
         if (!id) {
-            return res.status(400).json({ message: "Enter ID !!!" });
+            return res.status(ResponseCodes.NO_CONTENT).json({ message: "Enter ID !!!" });
         }
 
         const userOrder = await Order.findOne({ userID: id });
 
         if (!userOrder || userOrder.order.length === 0) {
-            return res.status(400).json({ message: "No Order Found" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "No Order Found" });
         }
 
         // Find the index of the product within the order
@@ -931,12 +932,12 @@ const cancelOrder = async (req, res) => {
             // Save the updated order
             await userOrder.save();
 
-            return res.json({ message: "Product cancelled in the order", order: userOrder.order[orderIndex] });
+            return res.status(ResponseCodes.SUCCESS).json({ message: "Product cancelled in the order", order: userOrder.order[orderIndex] });
         } else {
-            return res.status(400).json({ message: "Product not found in the order" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product not found in the order" });
         }
     } catch (error) {
-        return res.status(400).json({ message: "Error Cancelling Order", Error: error.message });
+        return res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Cancelling Order", Error: error.message });
     }
 }
 
