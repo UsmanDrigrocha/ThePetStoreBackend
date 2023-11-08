@@ -557,15 +557,15 @@ const readAddresses = async (req, res) => {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exist" })
         }
 
-        const findAddresses = await userProfileModel.findOne({ userId: _id });
+        const findAddresses = await userProfileModel.findOne({ userId: id });
         if (!findAddresses) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Addresses Don't Exist " })
         }
 
-        const data = findUser.addresses;
+        const data = await userProfileModel.findOne({ userId: id }).populate('userId');
         res.status(ResponseCodes.SUCCESS).json({ Addresses: data })
     } catch (error) {
-        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Reading Addresses" })
+        res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Reading Addresses", Error: error.message })
     }
 }
 
