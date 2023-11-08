@@ -31,9 +31,9 @@ const {
     editOrderStatus
 } = require('../controllers/adminController');
 const { validateAdmin } = require('../middlewares/validateAdmin');
+const { newArrivals } = require('../controllers/userControllers')
 
-
-route.post('/adminLogin', validateAdmin, adminLogin);
+route.post('/adminLogin', adminLogin);
 route.post('/uploadBannerImage', validateAdmin, imageController);
 route.get('/getBannerImg', validateAdmin, showBannerImg);
 route.get('/getRegistedUsers', validateAdmin, showRegistedUsers);
@@ -58,6 +58,6 @@ route.delete('/deleteAdmin/:id', validateAdmin, deleteAdmin);
 route.get('/getAllAdmins/:id', validateAdmin, getAllAdmins);
 
 route.post('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
-
+route.get('/newArrivals', validateAdmin, newArrivals)
 
 module.exports = route;

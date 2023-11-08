@@ -44,8 +44,9 @@ route.post('/verify-otp', verifyOTP)
 route.post('/change-password', userChangePassword); // Change Old Password ✅
 route.post('/reset-password', userResetPassword); // Send link to Email
 route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
-route.post('/createProfile/:id', addUserProfile) // Create User Profile Image
-route.post('/updateProfile/:id', updateUserProfile) // Update User Profile Image
+
+route.post('/createProfile/:id', validateToken, addUserProfile) // Create User Profile Image
+route.post('/updateProfile/:id', validateToken, updateUserProfile) // Update User Profile Image
 route.get('/getAllCategories', validateToken, getProductCategories)
 route.post('/uploadImage', validateToken, uploadImage)
 route.post('/addToWishlist/:id', validateToken, addToWishlist)
