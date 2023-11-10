@@ -6,7 +6,7 @@ const session = require('express-session');
 const validateToken = async (req, res, next) => {
     try {
         const userToken = req.session.token; // Get the token from the session
-        const clientToken = req.headers.authorization.split('Bearer ')[1];
+        const clientToken = req.headers.authorization.split('Bearer ')[1] ||  req.headers.authorization;
 
         if (!userToken || userToken !== clientToken) {
             return res.status(401).send('Unauthorized User !');
