@@ -47,4 +47,8 @@ app.get('/', (req, res) => {
 //   credential: admin.credential.cert(serviceAccount)
 // });
 
+// # First RUN : ' cd swagger ; node swagger.js -- then it generate swagger-output.json file ; then run server '
+const swaggerUi=require('swagger-ui-express')
+const swaggerDocument = require('./swagger/swagger-output.json')
 
+app.use('/api-docs',swaggerUi.serve,swaggerUi.setup(swaggerDocument));
