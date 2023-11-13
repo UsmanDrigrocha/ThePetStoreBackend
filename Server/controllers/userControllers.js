@@ -19,6 +19,10 @@ const ResponseCodes = require('../utils/methods/response')
 
 const mongoose = require('mongoose')
 
+const randomStringModule = require('../utils/randomString');
+
+// Use the function
+
 //Register Account ✅
 const userRegister = async (req, res) => {
     try {
@@ -74,26 +78,38 @@ const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await userModel.findOne({ email: email, isDeleted: false });
-        if (!email || !password) { // if any field missing
+
+        if (!email || !password) {
             res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
-        }
-        else {
-            if (!user) { // if email doesn't exist in DB
-                res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exists" });
+        } else {
+            if (!user) {
+                res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exist" });
             } else {
                 if (!user.isActive === true) {
-                    return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Verify first" })
+                    return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Verify first" });
                 }
-                const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
-                bcrypt.compare(password, user.password, function (err, result) {
-                    //Comparing Password
 
-                    if (result) { //if password is correct
-                        req.session.token = token;
-                        res.status(ResponseCodes.SUCCESS).json({ message: "User Logged In successfully", token: token });
-                    } else { // if wrong password
-                        res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Wrong Password" });
-                    }
+                // Generate a new token version
+                const randomString = randomStringModule.generateRandomString(10);
+
+                // Update the token version atomically
+                const updatedUser = await userModel.findOneAndUpdate(
+                    { email: email, isDeleted: false },
+                    { tokenVersion: randomString },
+                    { new: true } // Return the modified document
+                );
+
+
+                // Create the JWT token using the updated token version
+                const token = jwt.sign(
+                    { userID: updatedUser.id, tokenVersion: updatedUser.tokenVersion },
+                    process.env.JWT_SECRET_KEY,
+                    { expiresIn: '4d' }
+                );
+
+                res.status(ResponseCodes.SUCCESS).json({
+                    message: "User Logged In successfully",
+                    token: token,
                 });
             }
         }
@@ -101,6 +117,7 @@ const userLogin = async (req, res) => {
         res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error while login", error: error.message });
     }
 };
+
 
 //Forget Password : Change Password ✅
 const userChangePassword = async (req, res) => {
@@ -337,7 +354,8 @@ const uploadImage = async (req, res) => {
 // Create User Profile Image✅
 const addUserProfile = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { userID } = req.user;
+        const id = userID;
         const { image, addresses } = req.body;
 
         if (!id) {
@@ -373,7 +391,8 @@ const addUserProfile = async (req, res) => {
 // Update User Profile Image ✅
 const updateUserProfile = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { userID } = req.user;
+        const id = userID;
         const { image } = req.body;
 
         if (!id) {
@@ -385,7 +404,7 @@ const updateUserProfile = async (req, res) => {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Registered" })
         }
 
-        const findProfile = await userProfileModel.findOne({ userId: findUser._id });
+        const findProfile = await userProfileModel.findOne({ userId: findUser._id }).populate('userId');
         if (!findProfile) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Profile Not Exist" });
         }
@@ -403,16 +422,16 @@ const updateUserProfile = async (req, res) => {
 const addToWishlist = async (req, res) => {
     try {
         const { id } = req.params;
-        const { email } = req.body;
+        const { userID } = req.user;
 
-        if (!id || !email) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide both ID and Email" });
+        if (!id) {
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide product ID" });
         }
 
-        const findUser = await userModel.findOne({ email, isDeleted: false });
+        const findUser = await userModel.findOne({ _id: userID, isDeleted: false });
 
         if (!findUser) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User with this email is not registered" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User is not registered" });
         }
 
         const findProduct = await Product.findOne({ _id: id });
@@ -455,13 +474,13 @@ const addToWishlist = async (req, res) => {
 const deleteWishlist = async (req, res) => {
     try {
         const { id } = req.params;
-        const { email } = req.body;
+        const { userID } = req.user;
 
-        if (!id || !email) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide both ID and Email" });
+        if (!id ) {
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide ID" });
         }
 
-        const findUser = await userModel.findOne({ email, isDeleted: false });
+        const findUser = await userModel.findOne({ _id: userID, isDeleted: false });
 
         if (!findUser) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User with this email is not registered" });
@@ -474,7 +493,7 @@ const deleteWishlist = async (req, res) => {
         }
 
 
-        const userWishlist = await WishlistModel.findOne({ userID: findUser._id });
+        const userWishlist = await WishlistModel.findOne({ userID: findUser._id }).populate('userID');
         const wishlistItem = userWishlist.wishlist.find(item => item.productID == id);
         if (!wishlistItem) {
             res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Exist in Wishlist" })
@@ -498,7 +517,8 @@ const deleteWishlist = async (req, res) => {
 // Get all items from wishlist ✅
 const getUserWishlist = async (req, res) => {
     try {
-        const { id } = req.params;
+        const {userID}=req.user;
+        const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter id" })
         }
@@ -520,7 +540,8 @@ const getUserWishlist = async (req, res) => {
 // Add User Addresses ✅
 const addAddress = async (req, res) => {
     try {
-        const { id } = req.params;
+        const {userID}=req.user;
+        const id = userID;
         const { addresses } = req.body;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
@@ -548,7 +569,8 @@ const addAddress = async (req, res) => {
 // Get  User Addresse //  ✅
 const readAddresses = async (req, res) => {
     try {
-        const { id } = req.params;
+        const {userID}=req.user;
+        const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
@@ -572,7 +594,8 @@ const readAddresses = async (req, res) => {
 // Update User Addresse  :id ✅
 const updateUserAddresses = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { userID } = req.user;
+        const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" });
         }
@@ -590,8 +613,11 @@ const updateUserAddresses = async (req, res) => {
         const findProfile = await userProfileModel.findOne({ userId: id })
         if (!findProfile) {
             const newProfile = new userProfile({
-                addresses: addresses
+                addresses: addresses,
+                userId: userID
             });
+            await newProfile.save();
+            return res.status(ResponseCodes.SUCCESS).json({ message: "User Addresses Updated", newProfile })
         } else {
             findProfile.addresses = addresses;
             findProfile.save();
@@ -661,9 +687,10 @@ const deleteCartItem = async (req, res) => {
 const addToCart = async (req, res) => {
     try {
         const { id } = req.params;
-        const { quantity, email } = req.body;
+        const { quantity } = req.body;
+        const { userID } = req.user;
 
-        if (!email || !quantity) {
+        if (!id || !quantity) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter All Fields" });
         }
 
@@ -671,7 +698,7 @@ const addToCart = async (req, res) => {
             return res.status(ResponseCodes.BAD_REQUEST).json({ error: 'Invalid quantity' });
         }
 
-        const user = await userModel.findOne({ email, isDeleted: false });
+        const user = await userModel.findOne({ _id: userID, isDeleted: false });
 
         if (!user) {
             return res.status(ResponseCodes.NOT_FOUND).json({ error: 'User not found' });
@@ -683,7 +710,7 @@ const addToCart = async (req, res) => {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Found" });
         }
 
-        const userCart = await CartModel.findOne({ userID: user._id });
+        const userCart = await CartModel.findOne({ userID: user._id }).populate('userID');
 
         if (!userCart) {
             let totalPrice = findProduct.price * quantity;
@@ -729,7 +756,8 @@ const addToCart = async (req, res) => {
 // Show User Cart  ✅
 const showUserCart = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { userID } = req.user;
+        const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
@@ -742,7 +770,7 @@ const showUserCart = async (req, res) => {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Don't Have Cart" })
         }
         const data = userCart.cart;
-        res.status(ResponseCodes.CREATED).json({ message: "Getting User Cart", data });
+        res.status(ResponseCodes.CREATED).json({ message: "Getting User Cart", data, });
     } catch (error) {
         res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Getting User Cart", Error: error.message });
     }
@@ -827,7 +855,8 @@ const createCheckOUtSession = async (req, res) => {
 
 const createOrder = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { userID } = req.user;
+        const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID!" });
         }
@@ -888,7 +917,8 @@ const createOrder = async (req, res) => {
 
 const getUserOrders = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { userID } = req.user;
+        const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
         }
@@ -905,8 +935,9 @@ const getUserOrders = async (req, res) => {
 
 const cancelOrder = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { productID } = req.body;
+        const { userID } = req.user;
+        const id = userID;
+        const { productID } = req.params;
 
         if (!productID) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Product ID" });

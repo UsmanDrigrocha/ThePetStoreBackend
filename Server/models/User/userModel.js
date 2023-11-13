@@ -23,7 +23,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'user'
   },
-  isActive: { type: Boolean, default: false }
+  isActive: { type: Boolean, default: false },
+  tokenVersion: { type: Number, default: 1 },
   // profileImage: { type: String },
   // wishlist: {
   //   type: [String],
