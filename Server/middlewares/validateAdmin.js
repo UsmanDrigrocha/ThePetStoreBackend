@@ -6,7 +6,7 @@ const session = require('express-session');
 const validateAdmin = async (req, res, next) => {
     try {
         const adminToken = req.session.adminToken; // Get the token from the session
-        const clientToken = req.headers.authorization.split('Bearer ')[1];
+        const clientToken = req.headers.authorization.split('Bearer ')[1] || req.headers.authorization;
 
         if (!adminToken || adminToken !== clientToken) {
             res.status(401)
