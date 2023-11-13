@@ -46,7 +46,7 @@ route.post('/reset-password', userResetPassword); // Send link to Email
 route.get('/reset-password/:id/:token', verifyUserResetPassword) //Verify Link
 
 route.post('/createProfile/:id', validateToken, addUserProfile) // Create User Profile Image
-route.post('/updateProfile/:id', validateToken, updateUserProfile) // Update User Profile Image
+route.put('/updateProfile/:id', validateToken, updateUserProfile) // Update User Profile Image
 route.get('/getAllCategories', validateToken, getProductCategories)
 route.post('/uploadImage',  uploadImage)
 route.post('/addToWishlist/:id', validateToken, addToWishlist)
@@ -54,11 +54,11 @@ route.post('/removeFromWishlist/:id', validateToken, deleteWishlist)
 route.get('/getUserWishlist/:id', validateToken, getUserWishlist)
 route.post('/addAddress/:id', validateToken, addAddress)
 route.get('/getUserAddresses/:id', validateToken, readAddresses)
-route.post('/updateUserAddresses/:id', validateToken, updateUserAddresses)
+route.put('/updateUserAddresses/:id', validateToken, updateUserAddresses)
 route.get('/newArrivals', validateToken, newArrivals)
 route.post('/addToCart/:id', validateToken, addToCart)
 route.post('/deleteCartItem/:id', validateToken, deleteCartItem)
-route.post('/updateCartItem/:id', validateToken, addToCart)
+route.put('/updateCartItem/:id', validateToken, addToCart)
 route.post('/validateCoupon/:id', validateToken, validateCoupon)
 route.get('/getUserCart/:id', validateToken, showUserCart)
 route.post('/createCheckOUtSession/:id', validateToken, createCheckOUtSession)

@@ -51,13 +51,13 @@ route.put('/updateProduct/:id', validateAdmin, UpdateProduct);
 route.delete('/deleteProduct/:id', validateAdmin, deleteProduct);
 route.post('/createOffer/:id', validateAdmin, createOffer);
 route.get('/getAllOffers', validateAdmin, readOffers);
-route.post('/updateOffer/:id', validateAdmin, updateOffer);
+route.put('/updateOffer/:id', validateAdmin, updateOffer);
 route.delete('/deleteOffer/:id', validateAdmin, deleteOffer);
 route.post('/createAdmin/:id', validateAdmin, createAdmin);
 route.delete('/deleteAdmin/:id', validateAdmin, deleteAdmin);
 route.get('/getAllAdmins/:id', validateAdmin, getAllAdmins);
 
-route.post('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
+route.put('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
 route.get('/newArrivals', validateAdmin, newArrivals)
 
 module.exports = route;
