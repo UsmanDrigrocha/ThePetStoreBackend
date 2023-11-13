@@ -15,11 +15,24 @@ const saveNotificaton = require('../utils/saveNotification')
 
 const ResponseCodes = require('../utils/methods/response')
 
+const randomStringModule = require('../utils/randomString');
+
+
+// ### Starting Admin Login + Validation ; req.user
 
 //  ✅
 const showRegistedUsers = async (req, res) => {
   try {
     try {
+      const { userID } = req.user;
+      const findAdmin = await userModel.findOne({ _id: userID, isDeleted: false });
+      console.log(findAdmin)
+      if (!findAdmin) {
+        return res.status(ResponseCodes.NOT_FOUND).json({ message: "Not Found" })
+      }
+      if (!findAdmin.role === 'Super Admin' || !findAdmin.role === 'admin') {
+        return res.status(ResponseCodes.UNAUTHORIZED).json('Unauthorized Person');
+      }
       const data = await userModel.find({})
       res.status(ResponseCodes.SUCCESS).json(data);
     } catch (error) {
@@ -47,11 +60,18 @@ const adminLogin = async (req, res) => {
         if (!user.role === 'Super Admin' || !user.role === 'admin') {
           return res.send('Unauthorized to LOGIN');
         }
-        const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
+        const randomString = randomStringModule.generateRandomString(10);
+
+        const updatedUser = await userModel.findOneAndUpdate(
+          { email: email, isDeleted: false },
+          { tokenVersion: randomString },
+          { new: true } // Return the modified document
+        );
+        // randomString
+        const token = jwt.sign({ userID: user.id, tokenVersion: updatedUser.tokenVersion }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
         bcrypt.compare(password, user.password, function (err, result) {
           //Comparing Password
           if (result) { //if password is correct
-            req.session.adminToken = token;
             res.status(ResponseCodes.ACCEPTED).json({ message: "User Logged In successfully", adminToken: token });
           } else { // if wrong password
             res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Wrong Password" });
@@ -67,6 +87,15 @@ const adminLogin = async (req, res) => {
 //  ✅
 const showBannerImg = async (req, res) => {
   try {
+    const { userID } = req.user;
+    const findAdmin = await userModel.findOne({ _id: userID, isDeleted: false });
+    console.log(findAdmin)
+    if (!findAdmin) {
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Not Found" })
+    }
+    if (!findAdmin.role === 'Super Admin' || !findAdmin.role === 'admin') {
+      return res.status(ResponseCodes.UNAUTHORIZED).json('Unauthorized Person');
+    }
     const data = await bannerModel.find({});
     res.status(ResponseCodes.SUCCESS).json(data);
   } catch (error) {
@@ -79,7 +108,8 @@ const showBannerImg = async (req, res) => {
 //  ✅
 const createCategory = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userID } = req.user;
+    const id = userID;
     const admin = await userModel.findOne({ _id: id, isDeleted: false });
     if (!admin) {
       return res.status(ResponseCodes.BAD_REQUEST).json({ message: "User Not Exist !!!!!!!!" });
@@ -124,6 +154,7 @@ const createCategory = async (req, res) => {
 //  ✅
 const readOneCategory = async (req, res) => {
   try {
+
     const { id } = req.params;
     if (!id) {
       return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" });
@@ -146,7 +177,9 @@ const readOneCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, image, categoryID, adminId } = req.body;
+    const { name, image, categoryID } = req.body;
+    const { userID } = req.user;
+    const adminId = userID;
 
     if (!adminId) {
       return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter All Fields" });
@@ -234,12 +267,21 @@ const getChildCategories = async (req, res) => {
 //  ✅
 const deleteCategory = async (req, res) => {
   try {
+    const { userID } = req.user;
+    const findAdmin = await userModel.findOne({ _id: userID, isDeleted: false });
+    console.log(findAdmin)
+    if (!findAdmin) {
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Not Found" })
+    }
+    if (!findAdmin.role === 'Super Admin' || !findAdmin.role === 'admin') {
+      return res.status(ResponseCodes.UNAUTHORIZED).json('Unauthorized Person');
+    }
+    const adminId=userID;
     const { id } = req.params;
 
     if (!id) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" });
     }
-    const { adminId } = req.body;
     if (!adminId) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
@@ -272,7 +314,8 @@ const createProduct = async (req, res) => {
         return res.status(ResponseCodes.NOT_FOUND).json({ message: "No Such Parent Exist" });
       }
 
-      const { adminId } = req.body;
+      const { userID } = req.user;
+      const adminId = userID;
       if (!adminId) {
         return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
       }
@@ -370,7 +413,8 @@ const UpdateProduct = async (req, res) => {
     if (!findProduct) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Found" })
     }
-    const { adminId } = req.body;
+    const { userID } = req.user;
+    const adminId = userID;
     if (!adminId) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
@@ -420,7 +464,8 @@ const UpdateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { adminId } = req.body;
+    const { userID } = req.user;
+    const adminId = userID;
     if (!adminId) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
@@ -444,12 +489,14 @@ const deleteProduct = async (req, res) => {
 //  ✅
 const createOffer = async (req, res) => {
   try {
+
     const { id } = req.params;
     if (!id) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Product ID" });
     }
 
-    const { adminId } = req.body;
+    const { userID } = req.user;
+    const adminId = userID;
     if (!adminId) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
@@ -530,7 +577,8 @@ const updateOffer = async (req, res) => {
     if (!id) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID !" });
     }
-    const { adminId } = req.body;
+    const { userID } = req.user;
+    const adminId = userID;
     if (!adminId) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
@@ -579,7 +627,8 @@ const deleteOffer = async (req, res) => {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID !" });
     }
 
-    const { adminId } = req.body;
+    const { userID } = req.user;
+    const adminId = userID;
     if (!adminId) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" })
     }
@@ -631,7 +680,8 @@ async function updateProductOfferPrice(productId) {
 
 const createAdmin = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userID } = req.user;
+    const id = userID;
     const { name, email, password, role } = req.body;  // Taking name , email , password from body
     const superAdmin = await userModel.findOne({ _id: id, isDeleted: false });
     if (!superAdmin) {
@@ -689,7 +739,8 @@ const createAdmin = async (req, res) => {
 
 const deleteAdmin = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userID } = req.user;
+    const id = userID;
     if (!id) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
     }
@@ -722,7 +773,8 @@ const deleteAdmin = async (req, res) => {
 
 const getAllAdmins = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { userID } = req.user;
+    const id = userID;
     if (!id) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
     }
@@ -750,7 +802,9 @@ const getAllAdmins = async (req, res) => {
 const editOrderStatus = async (req, res) => {
   try {
     const { id } = req.params; // user ID
-    const { productID, adminID, paymentStatus, orderStatus } = req.body;
+    const { productID, paymentStatus, orderStatus } = req.body;
+    const { userID } = req.user;
+    const adminID = userID;
     if (!adminID) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Admin ID" });
     }
@@ -776,7 +830,7 @@ const editOrderStatus = async (req, res) => {
     if (!findUser) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Registered" })
     }
-    const userOrder = await Order.findOne({ userID: id });
+    const userOrder = await Order.findOne({ userID: id }).populate('userID');
 
     if (!userOrder || userOrder.order.length === 0) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "No Order Found" });

@@ -37,9 +37,9 @@ route.post('/adminLogin', adminLogin);
 route.post('/uploadBannerImage', validateAdmin, imageController);
 route.get('/getBannerImg', validateAdmin, showBannerImg);
 route.get('/getRegistedUsers', validateAdmin, showRegistedUsers);
-route.post('/createCatagory/:id', validateAdmin, createCategory)//
+route.post('/createCatagory/', validateAdmin, createCategory)//
 route.get('/getProductCategories', validateAdmin, getProductCategories);
-route.get('/getOneCategory/:id', validateAdmin, readOneCategory)
+route.get('/getOneCategory/:id', validateAdmin, readOneCategory)/
 route.put('/updateCategory/:id', validateAdmin, updateCategory);
 route.get('/getChildCategories/:id', validateAdmin, getChildCategories);
 route.delete('/deleteCategory/:id', validateAdmin, deleteCategory);
@@ -53,9 +53,9 @@ route.post('/createOffer/:id', validateAdmin, createOffer);
 route.get('/getAllOffers', validateAdmin, readOffers);
 route.put('/updateOffer/:id', validateAdmin, updateOffer);
 route.delete('/deleteOffer/:id', validateAdmin, deleteOffer);
-route.post('/createAdmin/:id', validateAdmin, createAdmin);
-route.delete('/deleteAdmin/:id', validateAdmin, deleteAdmin);
-route.get('/getAllAdmins/:id', validateAdmin, getAllAdmins);
+route.post('/createAdmin/', validateAdmin, createAdmin);
+route.delete('/deleteAdmin/', validateAdmin, deleteAdmin);
+route.get('/getAllAdmins/', validateAdmin, getAllAdmins);
 
 route.put('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
 route.get('/newArrivals', validateAdmin, newArrivals)
