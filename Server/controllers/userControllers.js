@@ -89,6 +89,7 @@ const userLogin = async (req, res) => {
                     return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Verify first" });
                 }
 
+
                 // Generate a new token version
                 const randomString = randomStringModule.generateRandomString(10);
 
@@ -107,10 +108,16 @@ const userLogin = async (req, res) => {
                     { expiresIn: '4d' }
                 );
 
-                res.status(ResponseCodes.SUCCESS).json({
-                    message: "User Logged In successfully",
-                    token: token,
-                });
+
+
+                bcrypt.compare(password, user.password, function (err, result) {
+                    //Comparing Password
+                    if (result) { //if password is correct
+                        res.status(ResponseCodes.SUCCESS).json({ message: "User Logged In successfully", token: token });
+                    } else { // if wrong password
+                        res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Wrong Password" });
+                    }
+                })
             }
         }
     } catch (error) {
@@ -476,7 +483,7 @@ const deleteWishlist = async (req, res) => {
         const { id } = req.params;
         const { userID } = req.user;
 
-        if (!id ) {
+        if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide ID" });
         }
 
@@ -517,7 +524,7 @@ const deleteWishlist = async (req, res) => {
 // Get all items from wishlist ✅
 const getUserWishlist = async (req, res) => {
     try {
-        const {userID}=req.user;
+        const { userID } = req.user;
         const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter id" })
@@ -540,7 +547,7 @@ const getUserWishlist = async (req, res) => {
 // Add User Addresses ✅
 const addAddress = async (req, res) => {
     try {
-        const {userID}=req.user;
+        const { userID } = req.user;
         const id = userID;
         const { addresses } = req.body;
         if (!id) {
@@ -569,7 +576,7 @@ const addAddress = async (req, res) => {
 // Get  User Addresse //  ✅
 const readAddresses = async (req, res) => {
     try {
-        const {userID}=req.user;
+        const { userID } = req.user;
         const id = userID;
         if (!id) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
