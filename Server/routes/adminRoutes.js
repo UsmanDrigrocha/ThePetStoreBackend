@@ -44,7 +44,7 @@ route.put('/updateCategory/:id', validateAdmin, updateCategory);
 route.get('/getChildCategories/:id', validateAdmin, getChildCategories);
 route.delete('/deleteCategory/:id', validateAdmin, deleteCategory);
 route.post('/createProduct', validateAdmin, createProduct);
-route.get('/getAllProducts', validateAdmin, getAllProducts);
+route.get('/getAllProducts', getAllProducts);
 route.get('/getProductsByCategories/:id', validateAdmin, getProductsByCategories);
 route.get('/getOneProduct/:id', validateAdmin, getOneProduct);
 route.put('/updateProduct/:id', validateAdmin, UpdateProduct);
