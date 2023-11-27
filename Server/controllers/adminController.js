@@ -50,8 +50,12 @@ const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email: email });
-    if (!email || !password) { // if any field missing
-      res.status(ResponseCodes.BAD_REQUEST).json({ message: "Some field missing !!!" });
+    if (!email ) { // if any field missing
+    return  res.status(ResponseCodes.BAD_REQUEST).json({ message: "Email field missing !!!" });
+    }
+
+    if(!password){
+       return  res.status(ResponseCodes.BAD_REQUEST).json({ message: "Password field missing !!!" });
     }
     else {
       if (!user) { // if email doesn't exist in DB
