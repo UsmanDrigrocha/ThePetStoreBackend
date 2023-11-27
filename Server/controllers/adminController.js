@@ -480,8 +480,7 @@ const deleteProduct = async (req, res) => {
     if (!admin.role === 'Super Admin' || !admin.role === 'admin') {
       return res.send('Unauthorized Person');
     }
-     const objId = new mongoose.Types.ObjectId(id);
-    const findProduct = await Product.findOneAndDelete({ objId: id });
+    const findProduct = await Product.findOneAndDelete({ _id: id });
     if (!findProduct) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Product Not Found" })
     }
