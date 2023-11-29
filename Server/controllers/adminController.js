@@ -105,6 +105,28 @@ const showBannerImg = async (req, res) => {
 };
 
 
+const getAllCategories = async (req, res) => {
+  try {
+    const { userID } = req.user;
+    const findAdmin = await userModel.findOne({ _id: userID, isDeleted: false });
+    console.log(findAdmin)
+    if (!findAdmin) {
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Not Found" })
+    }
+    if (!findAdmin.role === 'Super Admin' || !findAdmin.role === 'admin') {
+      return res.status(ResponseCodes.UNAUTHORIZED).json('Unauthorized Person');
+    }
+    const allCategories = await Category.find({});
+    res.status(ResponseCodes.ACCEPTED).json({
+      message:"Categories Found",
+      Categories : allCategories
+    })
+  } catch (error) {
+    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error while getting categories' });
+  }
+}
+
+
 //  ✅
 const createCategory = async (req, res) => {
   try {
@@ -276,7 +298,7 @@ const deleteCategory = async (req, res) => {
     if (!findAdmin.role === 'Super Admin' || !findAdmin.role === 'admin') {
       return res.status(ResponseCodes.UNAUTHORIZED).json('Unauthorized Person');
     }
-    const adminId=userID;
+    const adminId = userID;
     const { id } = req.params;
 
     if (!id) {

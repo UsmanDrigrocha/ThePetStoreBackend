@@ -60,4 +60,6 @@ route.get('/getAllAdmins/', validateAdmin, getAllAdmins);
 route.put('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
 route.get('/newArrivals', validateAdmin, newArrivals)
 
+route.get('/getAllCategories', validateAdmin, newArrivals)
+
 module.exports = route;
