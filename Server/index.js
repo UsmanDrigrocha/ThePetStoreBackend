@@ -22,7 +22,7 @@ app.use(
   })
 );
 
-app.use('/', express.static(path.join(__dirname, 'uploads')));
+app.use('/public/', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
