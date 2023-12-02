@@ -343,9 +343,9 @@ const uplod = multer({ storage: store, fileFilter: imageFilter });
 const uploadImage = async (req, res) => {
     try {
         uplod.single('image')(req, res, (err) => {
-            if (!req?.file) {
-                return res.status(ResponseCodes.METHOD_NOT_ALLOWED).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
-            }
+            // if (!req?.file) {
+            //     return res.status(ResponseCodes.METHOD_NOT_ALLOWED).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
+            // }
 
             const fileType = req.file.mimetype;
             const fileName = req.file.filename;
