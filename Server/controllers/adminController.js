@@ -50,12 +50,12 @@ const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email: email });
-    if (!email ) { // if any field missing
-    return  res.status(ResponseCodes.BAD_REQUEST).json({ message: "Email field missing !!!" });
+    if (!email) { // if any field missing
+      return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Email field missing !!!" });
     }
 
-    if(!password){
-       return  res.status(ResponseCodes.BAD_REQUEST).json({ message: "Password field missing !!!" });
+    if (!password) {
+      return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Password field missing !!!" });
     }
     else {
       if (!user) { // if email doesn't exist in DB
@@ -122,8 +122,8 @@ const getAllCategories = async (req, res) => {
     }
     const allCategories = await Category.find({});
     res.status(ResponseCodes.ACCEPTED).json({
-      message:"Categories Found",
-      Categories : allCategories
+      message: "Categories Found",
+      Categories: allCategories
     })
   } catch (error) {
     res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error while getting categories' });
@@ -370,7 +370,7 @@ const createProduct = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message)
-    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error creating Product", Error:error.message });
+    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error creating Product", Error: error.message });
   }
 }
 
@@ -716,7 +716,7 @@ const createAdmin = async (req, res) => {
     if (!superAdmin.role === 'Super Admin') {
       return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Unauthorized" })
     }
-    if (!name || !email || !password || !role || !id) {
+    if (!name || !email || !password || !role ) {
       res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
     } else {
       const saltRounds = 10;
@@ -738,7 +738,8 @@ const createAdmin = async (req, res) => {
             otp: null,
             createdAt: null,
             expiresAt: null,
-            role: role
+            role: role,
+            isActive:true
           });
 
           try {
@@ -749,7 +750,7 @@ const createAdmin = async (req, res) => {
             } else {
               await newUser.save();
               const token = jwt.sign({ userID: newUser.id }, process.env.JWT_SECRET_KEY, { expiresIn: '4d' });
-              res.status(ResponseCodes.CREATED).json({ message: "Admin Registered Successfully", Admin: newUser });
+              res.status(ResponseCodes.CREATED).json({ message: "User Registered Successfully", User: newUser });
             }
           } catch (error) {
             res.status(ResponseCodes.BAD_REQUEST).json({ message: "Error saving user", error: error.message });
@@ -777,23 +778,23 @@ const deleteAdmin = async (req, res) => {
     if (!superAdmin.role === 'Super Admin') {
       return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Unauthorized to Perform Action" })
     }
-    const { email } = req.body;
-    if (!email) {
-      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Email" });
+    const { idToDelete } = req.params;
+    if (!idToDelete) {
+      return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter id" });
     }
-    const admin = await userModel.findOne({ email, isDeleted: false });
+    const admin = await userModel.findOne({ _id: idToDelete, isDeleted: false });
     if (!admin) {
       return res.status(ResponseCodes.NOT_FOUND).json({ message: "Not Exist" })
     }
-    if (!admin.role === 'admin') {
-      return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Its not admin" })
-    }
+    // if (!admin.role === 'admin') {
+    //   return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Its not admin" })
+    // }
 
     admin.isDeleted = true;
     await admin.save();
     res.status(ResponseCodes.SUCCESS).json({ message: "Admin Delted Successfully" });
   } catch (error) {
-    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error " })
+    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error ", Error: error.message })
   }
 }
 

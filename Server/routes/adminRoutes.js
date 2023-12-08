@@ -54,7 +54,7 @@ route.get('/getAllOffers', validateAdmin, readOffers);
 route.put('/updateOffer/:id', validateAdmin, updateOffer);
 route.delete('/deleteOffer/:id', validateAdmin, deleteOffer);
 route.post('/createAdmin/', validateAdmin, createAdmin);
-route.delete('/deleteAdmin/', validateAdmin, deleteAdmin);
+route.delete('/deleteAdmin/:idToDelete', validateAdmin, deleteAdmin);
 route.get('/getAllAdmins/', validateAdmin, getAllAdmins);
 
 route.put('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
