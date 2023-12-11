@@ -716,7 +716,7 @@ const createAdmin = async (req, res) => {
     if (!superAdmin.role === 'Super Admin') {
       return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Unauthorized" })
     }
-    if (!name || !email || !password || !role ) {
+    if (!name || !email || !password || !role) {
       res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
     } else {
       const saltRounds = 10;
@@ -739,7 +739,7 @@ const createAdmin = async (req, res) => {
             createdAt: null,
             expiresAt: null,
             role: role,
-            isActive:true
+            isActive: true
           });
 
           try {
@@ -887,6 +887,28 @@ const editOrderStatus = async (req, res) => {
   }
 }
 
+const getAllOrders = async (req, res) => {
+  try {
+    // const { id } = req.user;
+    // const findAdmin = await userModel.findOne({
+    //   _id: id,
+    //   isDeleted: false,
+    //   $or: [
+    //     { role: 'admin' },
+    //     { role: 'Super Admin' }
+    //   ]
+    // });
+    // if (!findAdmin) {
+    //   return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Unauthorized Person" })
+    // }
+    const orders = await Order.find({});
+    res.status(ResponseCodes.ACCEPTED).json({ message: "Orders", Orders: orders })
+
+  } catch (error) {
+    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ Error: error.message })
+  }
+}
+
 
 
 module.exports = {
@@ -914,4 +936,5 @@ module.exports = {
   deleteAdmin,
   getAllAdmins,
   editOrderStatus,
+  getAllOrders
 };

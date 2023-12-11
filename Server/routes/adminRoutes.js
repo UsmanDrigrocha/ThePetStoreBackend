@@ -28,7 +28,8 @@ const {
     createAdmin,
     deleteAdmin,
     getAllAdmins,
-    editOrderStatus
+    editOrderStatus,
+    getAllOrders
 } = require('../controllers/adminController');
 const { validateAdmin } = require('../middlewares/validateAdmin');
 const { newArrivals } = require('../controllers/userControllers')
@@ -61,5 +62,6 @@ route.put('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
 route.get('/newArrivals', validateAdmin, newArrivals)
 
 route.get('/getAllCategories', validateAdmin, newArrivals)
+route.get('/getAllOrders',validateAdmin,getAllOrders)
 
 module.exports = route;
