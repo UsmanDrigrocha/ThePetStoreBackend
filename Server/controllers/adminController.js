@@ -828,7 +828,7 @@ const getAllAdmins = async (req, res) => {
 
 const editOrderStatus = async (req, res) => {
   try {
-    const { id } = req.params; // user ID
+    const { id } = req.body; // user ID
     const { productID, paymentStatus, orderStatus } = req.body;
     const { userID } = req.user;
     const adminID = userID;
@@ -910,6 +910,22 @@ const getAllOrders = async (req, res) => {
 }
 
 
+const getUserDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID !" })
+    }
+    const findUser = await userModel.findOne({ _id: id, isDeleted: false });
+    if (!findUser) {
+      return res.status(ResponseCodes.BAD_REQUEST).json({ message: "User Not Found" });
+    }
+    res.status(ResponseCodes.ACCEPTED).json({ message: "User Found", User: findUser })
+  } catch (error) {
+
+    res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Getting User Details !" })
+  }
+}
 
 module.exports = {
   imageController,
@@ -936,5 +952,6 @@ module.exports = {
   deleteAdmin,
   getAllAdmins,
   editOrderStatus,
-  getAllOrders
+  getAllOrders,
+  getUserDetails
 };

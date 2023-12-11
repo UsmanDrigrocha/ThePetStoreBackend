@@ -29,7 +29,8 @@ const {
     deleteAdmin,
     getAllAdmins,
     editOrderStatus,
-    getAllOrders
+    getAllOrders,
+    getUserDetails
 } = require('../controllers/adminController');
 const { validateAdmin } = require('../middlewares/validateAdmin');
 const { newArrivals } = require('../controllers/userControllers')
@@ -40,8 +41,8 @@ route.get('/getBannerImg', validateAdmin, showBannerImg);
 route.get('/getRegistedUsers', validateAdmin, showRegistedUsers);
 route.post('/createCatagory/', validateAdmin, createCategory)//
 route.get('/getProductCategories', validateAdmin, getProductCategories);
-route.get('/getOneCategory/:id', validateAdmin, readOneCategory)/
-route.put('/updateCategory/:id', validateAdmin, updateCategory);
+route.get('/getOneCategory/:id', validateAdmin, readOneCategory) /
+    route.put('/updateCategory/:id', validateAdmin, updateCategory);
 route.get('/getChildCategories/:id', validateAdmin, getChildCategories);
 route.delete('/deleteCategory/:id', validateAdmin, deleteCategory);
 route.post('/createProduct', validateAdmin, createProduct);
@@ -58,10 +59,10 @@ route.post('/createAdmin/', validateAdmin, createAdmin);
 route.delete('/deleteAdmin/:idToDelete', validateAdmin, deleteAdmin);
 route.get('/getAllAdmins/', validateAdmin, getAllAdmins);
 
-route.put('/updateOrderStatus/:id', validateAdmin, editOrderStatus)
+route.put('/updateOrderStatus/', validateAdmin, editOrderStatus)
 route.get('/newArrivals', validateAdmin, newArrivals)
 
 route.get('/getAllCategories', validateAdmin, newArrivals)
-route.get('/getAllOrders',validateAdmin,getAllOrders)
-
+route.get('/getAllOrders', validateAdmin, getAllOrders)
+route.get('/getUserDetails/:id', validateAdmin, getUserDetails)
 module.exports = route;
