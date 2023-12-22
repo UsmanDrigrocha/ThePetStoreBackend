@@ -6,6 +6,7 @@ const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes')
 require('dotenv').config();
 const path = require('path');
+const {emailModel}=require('./models/user/email')
 
 require('./config/db')
 
@@ -52,3 +53,50 @@ const swaggerUi=require('swagger-ui-express')
 const swaggerDocument = require('./swagger/swagger-output.json')
 
 app.use('/api-docs',swaggerUi.serve,swaggerUi.setup(swaggerDocument));
+
+
+// Experiment
+
+// Save Email !
+app.post('/api/email_list/post', async (req, res) => {
+  try {
+      const { email } = req.body;
+      if (!email) {
+          return res.status(400).json({ Message: "Enter Email !" });
+      }
+      if (!(email.includes('@') && !email.includes(' '))) {
+          return res.status(400).json({ Message: "Enter Valid Email !" })
+      }
+      const findEmail = await emailModel.findOne({ email });
+      if (findEmail) {
+          return res.status(400).json({ Message: "Email already exist !" });
+      }
+      const newEmail = new emailModel({
+          email
+      })
+      await newEmail.save();
+      res.status(201).json({ Message: "Email Saved to DB !", Email: newEmail });
+  } catch (error) {
+      res.status(500).json({ Message: "Error Adding Email to list !" });
+  }
+})
+
+
+
+// Save Email !
+app.post('/api/email_list/get', async (req, res) => {
+  try {
+      const { name } = req.body;
+      if (!name) {
+          return res.status(400).json({ Message: "Enter secret key !" });
+      }
+      if (name === "ZURAS_ONLINE") {
+          const email_list = await emailModel.find({});
+          return res.status(200).json({ Message: "Email list", Email_List: email_list })
+      } else {
+          return res.status(401).json({ Message: "Unauthorized !" });
+      }
+  } catch (error) {
+      res.status(500).json({ Message: "Error Getting Email list !" });
+  }
+})
