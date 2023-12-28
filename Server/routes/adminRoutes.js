@@ -42,7 +42,7 @@ route.get('/getRegistedUsers', validateAdmin, showRegistedUsers);
 route.post('/createCatagory/', validateAdmin, createCategory)//
 route.get('/getProductCategories', validateAdmin, getProductCategories);
 route.get('/getOneCategory/:id', validateAdmin, readOneCategory) /
-    route.put('/updateCategory/:id', validateAdmin, updateCategory);
+route.put('/updateCategory/:id', validateAdmin, updateCategory);
 route.get('/getChildCategories/:id', validateAdmin, getChildCategories);
 route.delete('/deleteCategory/:id', validateAdmin, deleteCategory);
 route.post('/createProduct', validateAdmin, createProduct);
