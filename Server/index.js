@@ -1,7 +1,9 @@
-const session = require('express-session');
 const express = require('express');
 const app = express();
 const cors = require('cors')
+app.use(cors());
+
+const session = require('express-session');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes')
 require('dotenv').config();
@@ -11,7 +13,6 @@ const {emailModel}=require('./models/user/email')
 require('./config/db')
 
 app.use(express.json());
-app.use(cors());
 app.use(express.urlencoded({ extended: true }))
 
 app.use(
@@ -31,7 +32,7 @@ app.use('/api/admin', adminRoutes);
 const port = process.env.PORT;
 
 app.listen(port, () => {
-  console.log("Server Working Properly");
+  console.log("Server Working Properly" , port);
 });
 
 app.get('/', (req, res) => {

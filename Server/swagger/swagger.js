@@ -5,8 +5,8 @@ const doc = {
         title:"The Pet Store Backend",
         description:"This is The Pet Store"
     },
-    host:"localhost:8080",
-    schemes:['http','https']
+    host:"192.168.0.162",
+    schemes:['http']
 }
 
 const outputFile = './swagger-output.json'
