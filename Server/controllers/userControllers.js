@@ -29,7 +29,7 @@ const userRegister = async (req, res) => {
         const { name, email, password } = req.body;  // Taking name , email , password from body
 
         if (!name || !email || !password) {
-            res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
+            res.status(ResponseCodes.BAD_REQUEST).json({ message: "Some field missing !!!" });
         } else {
             const saltRounds = 10;
             bcrypt.genSalt(saltRounds, async function (err, salt) {
@@ -40,7 +40,7 @@ const userRegister = async (req, res) => {
                 bcrypt.hash(password, salt, async function (err, hashedPassword) {
                     if (err) {
                         console.error(err);
-                        return res.status(ResponseCodes.NOT_FOUND).json({ error: 'Enter Password !!!' });
+                        return res.status(ResponseCodes.UNAUTHORIZED).json({ error: 'Enter Password !!!' });
                     }
 
                     const newUser = new userModel({
@@ -50,6 +50,7 @@ const userRegister = async (req, res) => {
                         otp: null,
                         otpCreatedAt: null,
                         otpExpiredAt: null,
+                        isActive:true
                     });
 
                     try {
@@ -80,14 +81,14 @@ const userLogin = async (req, res) => {
         const user = await userModel.findOne({ email: email, isDeleted: false });
 
         if (!email || !password) {
-            res.status(ResponseCodes.NOT_FOUND).json({ message: "Some field missing !!!" });
+            res.status(ResponseCodes.BAD_REQUEST).json({ message: "Some field missing !!!" });
         } else {
             if (!user) {
                 res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exist" });
             } else {
-                if (!user.isActive === true) {
-                    return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Verify first" });
-                }
+                // if (!user.isActive === true) {
+                //     return res.status(ResponseCodes.UNAUTHORIZED).json({ message: "Verify first" });
+                // }
 
 
                 // Generate a new token version
@@ -157,7 +158,7 @@ const userChangePassword = async (req, res) => {
             }
         }
         else {
-            res.status(ResponseCodes.SUCCESS).json({ message: "Enter All Fields !!!" })
+            res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter All Fields !!!" })
         }
     } catch (error) {
         res.status(ResponseCodes.INTERNAL_SERVER_ERROR).json({ message: "Error Forgetting user password", error: error.message })
@@ -189,7 +190,7 @@ const userResetPassword = async (req, res) => {
                 res.status(ResponseCodes.NOT_FOUND).json({ message: "User Doesn't Exist" });
             }
         } else {
-            res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Email !!!" })
+            res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter Email !!!" })
         }
     } catch (error) {
         console.log(error.message);
@@ -203,7 +204,7 @@ const verifyUserResetPassword = async (req, res) => {
     try {
         const user = await userModel.findById({ _id: id, isDeleted: false });
         if (!user) {
-            res.status(ResponseCodes.NOT_FOUND).json({ message: "Invalid ID" });
+            res.status(ResponseCodes.BAD_REQUEST).json({ message: "Invalid ID" });
         }
         else {
             jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
@@ -244,7 +245,7 @@ const generateOTP = async (req, res) => {
     try {
         const { email } = req.body;
         if (!email) {
-            res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Email !!!" });
+            res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter Email !!!" });
         } else {
             const user = await userModel.findOne({ email: email, isDeleted: false })
             if (user) {
@@ -289,7 +290,7 @@ const verifyOTP = async (req, res) => {
         const { email, enteredOTP } = req.body;
 
         if (!email || !enteredOTP) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "User ID and OTP are required." });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "User ID and OTP are required." });
         }
 
         const otpUser = await userModel.findOne({ email: email, isDeleted: false });
@@ -343,9 +344,9 @@ const uplod = multer({ storage: store, fileFilter: imageFilter });
 const uploadImage = async (req, res) => {
     try {
         uplod.single('image')(req, res, (err) => {
-            // if (!req?.file) {
-            //     return res.status(ResponseCodes.METHOD_NOT_ALLOWED).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
-            // }
+            if (!req?.file) {
+                return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Only specific image file types (JPEG, PNG, GIF, SVG) are allowed!  " });
+            }
   
             const fileType = req.file.mimetype;
             const fileName = req.file.filename;
@@ -366,7 +367,7 @@ const addUserProfile = async (req, res) => {
         const { image, addresses } = req.body;
 
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" })
         }
 
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
@@ -375,7 +376,7 @@ const addUserProfile = async (req, res) => {
         }
 
         if (!image) {
-            return res.status(ResponseCodes.SUCCESS).json({ message: "Enter All Fields" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter All Fields" })
         }
 
         const findProfile = await userProfileModel.findOne({ userId: findUser._id })
@@ -403,7 +404,7 @@ const updateUserProfile = async (req, res) => {
         const { image } = req.body;
 
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" })
         }
 
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
@@ -432,7 +433,7 @@ const addToWishlist = async (req, res) => {
         const { userID } = req.user;
 
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide product ID" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Please provide product ID" });
         }
 
         const findUser = await userModel.findOne({ _id: userID, isDeleted: false });
@@ -456,7 +457,7 @@ const addToWishlist = async (req, res) => {
                 userID: findUser._id
             });
             await newWishlist.save();
-            return res.status(ResponseCodes.CREATED).json({ message: "Product Added To Wishlist", Product: newWishlist });
+            return res.status(ResponseCodes.SUCCESS).json({ message: "Product Added To Wishlist", Product: newWishlist });
         } else {
             const userWishlist = await WishlistModel.findOne({ userID: findUser._id });
             const wishlistItem = userWishlist.wishlist.find(item => item.productID == id);
@@ -484,7 +485,7 @@ const deleteWishlist = async (req, res) => {
         const { userID } = req.user;
 
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Please provide ID" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Please provide ID" });
         }
 
         const findUser = await userModel.findOne({ _id: userID, isDeleted: false });
@@ -527,7 +528,7 @@ const getUserWishlist = async (req, res) => {
         const { userID } = req.user;
         const id = userID;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter id" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter id" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
@@ -551,14 +552,14 @@ const addAddress = async (req, res) => {
         const id = userID;
         const { addresses } = req.body;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
             return res.status(ResponseCodes.NOT_FOUND).json({ message: "User Not Exist" })
         }
         if (!addresses) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Address" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter Address" })
         }
 
         const findProfile = await userProfileModel.findOne({ userId: findUser._id });
@@ -579,7 +580,7 @@ const readAddresses = async (req, res) => {
         const { userID } = req.user;
         const id = userID;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" })
         }
         const findUser = await userModel.findOne({ _id: id, isDeleted: false });
         if (!findUser) {
@@ -604,11 +605,11 @@ const updateUserAddresses = async (req, res) => {
         const { userID } = req.user;
         const id = userID;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" });
         }
         const { addresses } = req.body;
         if (!addresses) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Address" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter Address" })
         }
         const findUser = await userModel.findOneAndUpdate({ _id: id, isDeleted: false }, {
             addresses
@@ -654,7 +655,7 @@ const deleteCartItem = async (req, res) => {
         const { quantity, email } = req.body;
 
         if (!email) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter All Fields" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter All Fields" });
         }
 
 
@@ -671,7 +672,7 @@ const deleteCartItem = async (req, res) => {
         }
         const userCart = await CartModel.findOne({ userID: user._id });
         if (!userCart) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Create Your Cart !" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "No Item Found in cart !" })
         }
         else {
             const cartItemIndex = userCart.cart.findIndex(item => item.productID == id);
@@ -698,7 +699,7 @@ const addToCart = async (req, res) => {
         const { userID } = req.user;
 
         if (!id || !quantity) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter All Fields" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter All Fields" });
         }
 
         if (quantity <= 0) {
@@ -766,7 +767,7 @@ const showUserCart = async (req, res) => {
         const { userID } = req.user;
         const id = userID;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" })
         }
         const user = await userModel.findOne({ _id: id, isDeleted: false });
         if (!user) {
@@ -788,11 +789,11 @@ const validateCoupon = async (req, res) => {
     try {
         const enteredCouponCode = req.body.code;
         if (!enteredCouponCode) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Coupon Code" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter Coupon Code" });
         }
         const { id } = req.params;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" })
         }
         const findProduct = await Product.findOne({ _id: id });
         if (!findProduct) {
@@ -820,7 +821,7 @@ const createCheckOUtSession = async (req, res) => {
         const { products } = req.body;
 
         if (!products) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Products in req.body" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter Products in Body !" });
         }
 
         const lineItems = [];
@@ -865,7 +866,7 @@ const createOrder = async (req, res) => {
         const { userID } = req.user;
         const id = userID;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID!" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID!" });
         }
 
         const user = await userModel.findOne({ _id: id, isDeleted: false });
@@ -927,7 +928,7 @@ const getUserOrders = async (req, res) => {
         const { userID } = req.user;
         const id = userID;
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID" })
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID" })
         }
         const user = await userModel.findOne({ _id: id, isDeleted: false })
         if (!user) {
@@ -947,17 +948,17 @@ const cancelOrder = async (req, res) => {
         const { productID } = req.params;
 
         if (!productID) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter Product ID" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter Product ID" });
         }
 
         if (!id) {
-            return res.status(ResponseCodes.NOT_FOUND).json({ message: "Enter ID !!!" });
+            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "Enter ID !!!" });
         }
 
         const userOrder = await Order.findOne({ userID: id });
 
         if (!userOrder || userOrder.order.length === 0) {
-            return res.status(ResponseCodes.BAD_REQUEST).json({ message: "No Order Found" });
+            return res.status(ResponseCodes.NOT_FOUND).json({ message: "No Order Found" });
         }
 
         // Find the index of the product within the order
